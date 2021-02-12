@@ -3,3 +3,4 @@
 ## Team members
 - Jonathan Cai
 - Shakil Rafi
+- William Lin
