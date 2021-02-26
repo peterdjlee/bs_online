@@ -1,0 +1,15 @@
+{
+  "name": "bs-online-backend",
+  "version": "0.0.1",
+  "description": "Backend services for bs online",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jonathon, William",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
