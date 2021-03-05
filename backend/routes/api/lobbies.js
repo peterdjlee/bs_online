@@ -1,48 +1,171 @@
 /*
-    Methods List:
-
-    - Must make the correct request type and supply JSON file with specific data
-        - Check below for JSON requirements 
-    - requests should be made to "/api/lobbies/"
-        - ex. localhost:5000/api/lobbies/create, make post request and supply JSON file
-
-    POST    /create             - Creates a new lobby with a single player
-    GET     /info               - Displays all or specified lobby information
-    DELETE  /delete             - Deletes a lobby
-    PUT     /start              - Sets a lobby's game_started state to true
-    PUT     /changeNickname     - Change a specified player's name in a specified lobby
-    POST    /addPlayer          - Adds a player to the specified lobby
-    DELETE  /removePlayer       - Removes a player from the specified lobby
+    Methods:
+        - Find the URL for the operation you want
+        - Make the specified HTTP request type
+        - Supply JSON with the requirement fields
+        - Get JSON back
+____________________________________________________________________________________________
+    /api/lobbies/create - Creates a new lobby
+        Type: POST
+        Requirements: Nothing
+            ex. {}
+        Return: Lobby code
+            ex. {
+                    "lobby_code": "aRgI"
+                }
+____________________________________________________________________________________________
+    /api/lobbies/info - Displays all or specified lobby information
+        Type: GET
+        Req: Either lobby code for specific or optionally set "all" to true for all lobbies
+            ex. {
+                    "lobby_code": "ajeX",
+                }
+            ex. {
+                    "all" : true
+                }
+        Ret: Lobby information
+            ex. (specific)
+                {
+                    "lobby_code": "ajeX",
+                    "game_started": false,
+                    "max_players": 6,
+                    "players": []
+                }
+            ex. (all)
+                {
+                    "ajeX": {
+                        "lobby_code": "ajeX",
+                        "game_started": false,
+                        "max_players": 6,
+                        "players": []
+                    },
+                    "Odpw": {
+                        "lobby_code": "Odpw",
+                        "game_started": false,
+                        "max_players": 6,
+                        "players": []
+                    },
+                    "zgNb": {
+                        "lobby_code": "zgNb",
+                        "game_started": false,
+                        "max_players": 6,
+                        "players": []
+                    }
+                }
+____________________________________________________________________________________________
+    /api/lobbies/delete - Deletes a lobby
+        Type: DELETE
+        Req: Lobby code for delete
+            ex. {
+                    "lobby_code": "aRgI"
+                }
+        Ret: Empty JSON
+____________________________________________________________________________________________
+    /api/lobbies/start - Sets a lobby's game_started state to true
+        Type: PUT
+        Req: Lobby to start
+            ex. {
+                    "lobby_code": "aRgI"
+                }
+        Ret: Empty JSON
+____________________________________________________________________________________________
+    /api/lobbies/addPlayer - Adds a player to the specified lobby
+        Type: POST
+        Req: lobby to add to, socket id of new player, and optionally an initial name (Default = "Player")
+             Will not add if room has reached capactiy (Default = 6 players)
+            ex. {
+                    "lobby_code": "IIGy",
+                    "socket_id": "socket_id c",
+                    "nickname": "Newer Player"
+                }
+        Ret: List of players in the lobby
+            ex. {
+                    "players": [
+                        {
+                            "socket_id": "socket_id a",
+                            "nickname": "Player"
+                        },
+                        {
+                            "socket_id": "socket_id b",
+                            "nickname": "New Player"
+                        },
+                        {
+                            "socket_id": "socket_id c",
+                            "nickname": "Newer Player"
+                        }
+                    ]
+                }
+____________________________________________________________________________________________
+    /api/lobbies/changeNickname - Change a specified player's name in a specified lobby
+        Type: PUT
+        Req: lobby to add to, socket id of current player, new nickname
+            ex. {
+                    "lobby_code": "IIGy",
+                    "socket_id": "socket_id a",
+                    "nickname": "First Player"
+                }
+        Ret: List of players in the lobby
+            ex. {
+                    "players": [
+                        {
+                            "socket_id": "socket_id a",
+                            "nickname": "First Player"
+                        },
+                        {
+                            "socket_id": "socket_id b",
+                            "nickname": "New Player"
+                        },
+                        {
+                            "socket_id": "socket_id c",
+                            "nickname": "Newer Player"
+                        }
+                    ]
+                }
+_____________________________________________________________________________________________
+    /api/lobbies/removePlayer - Removes a player from the specified lobby
+        Type: DELETE
+        Req: lobby to remove player from, socket id of that player
+            ex. {
+                    "lobby_code": "IIGy",
+                    "socket_id": "socket_id a"
+                }
+        Ret: List of players in the lobby
+            ex. {
+                    "players": [
+                        {
+                            "socket_id": "socket_id b",
+                            "nickname": "New Player"
+                        },
+                        {
+                            "socket_id": "socket_id c",
+                            "nickname": "Newer Player"
+                        }
+                    ]
+                }
+________________________________________________________________________________________________
 */
 
 const express = require("express");
-const { addPlayer } = require("../../models/LobbiesMap");
 const router = express.Router();
+const lobbies = require("../../models/Lobbies");
 
-const lobbies_map = require("../../models/LobbiesMap");
+/*
+    Implementation of methods below follow a specific pattern:
+        - Get data from supplied JSON
+        - Check to make sure required fields are present
+        - Call certain functions from the Lobbies model
+        - Have return_helper decide the correct HTTP status code to return
+*/
 
-
-// Creates a new lobby with a single player
-//   Required: {"socket_id": *INSERT*, "nickname" = *INSERT*}
-//   Returns: Lobby code of the newly created lobby
 router.post("/create", (req, res) => {
-    const id = req.body.socket_id;
-    const nickname = req.body.nickname;
-
-    if(!id || !nickname) {
-        return res.status(400).json({msg: "socket_id and nickname required"});
-    }
-    return return_helper(lobbies_map.createLobby(nickname, id), res);
+    return return_helper(lobbies.createLobby(), res);
 });
 
 
-// Displays all or specified lobby information
-//   Requires: {"all": true} for displaying all lobbies
-//   Requires: {"lobby_code": *INSERT*} for displaying specified lobby
-//   Returns: Info of the lobby
 router.get("/info", (req, res) => {
+    // Returning all lobbies operation of /info has priority
     if (req.body.all === true) {
-        return return_helper(lobbies_map.getLobbyAll(), res);
+        return return_helper(lobbies.getLobbyAll(), res);
     }
 
     const code = req.body.lobby_code;
@@ -50,36 +173,34 @@ router.get("/info", (req, res) => {
         return res.status(400).json({msg: "lobby_code required or *all* key set to true"});
     }
 
-    return return_helper(lobbies_map.getLobby(code), res);
+    return return_helper(lobbies.getLobby(code), res);
 });
 
 
-// Delete a lobby
-//  Required: {"lobby_code": *INSERT*} for deleting the specified lobby
-//  Return: Nothing
 router.delete("/delete", (req, res) => {
     const code = req.body.lobby_code;
     if (!code) return res.status(400).json({msg: "lobby_code required"});
     
-    return return_helper(lobbies_map.deleteLobby(code), res);
+    return return_helper(lobbies.deleteLobby(code), res);
 });
 
 
-// Sets a lobby's game_started state to true
-//  Required: {"lobby_code": *INSERT*}
-//  Return: Nothing
 router.put("/start", (req, res) => {
     const code = req.body.lobby_code;
     if (!code) return res.status(400).json({msg: "lobby_code required"});
 
-    return return_helper(lobbies_map.startLobby(code), res);
+    return return_helper(lobbies.startLobby(code), res);
 });
 
 
-// Change a specified player's name in a specified lobby
-//   Required: {"lobby_code": *INSERT*, "socket_id": *INSERT*, "nickname": *INSERT*}
-//     Changes a player with the @socket_id inside lobby with @lobby_code 's name to @nickname
-//   Returns: List of players in the lobby with @lobby_code
+router.put("/stop", (req, res) => {
+    const code = req.body.lobby_code;
+    if (!code) return res.status(400).json({msg: "lobby_code required"});
+
+    return return_helper(lobbies.stopLobby(code), res);
+});
+
+
 router.put("/changeNickname", (req, res) => {
     const code = req.body.lobby_code;
     const id = req.body.socket_id;
@@ -88,14 +209,10 @@ router.put("/changeNickname", (req, res) => {
     if (!id || !nickname || !code) 
         return res.status(400).json({msg: "lobby_code, nickname, socket_id required"});
     
-    return return_helper(lobbies_map.changeNickname(code, id, nickname), res);
+    return return_helper(lobbies.changeNickname(code, id, nickname), res);
 });
 
 
-// Adds a player to the specified lobby (Will not go past maximum lobby size)
-//   Required: {"lobby_code": *INSERT*, "socket_id": *INSERT*}
-//   Optional: {"nickname": *INSERT*}, default is "Player"
-//   Returns: List of players in the lobby with @lobby_code
 router.post("/addPlayer", (req, res) => {
     const code = req.body.lobby_code;
     const id = req.body.socket_id;
@@ -104,13 +221,10 @@ router.post("/addPlayer", (req, res) => {
     if (!id || !code) 
         return res.status(400).json({msg: "lobby_code, socket_id required"});
 
-    return return_helper(lobbies_map.addPlayer(code, id, nickname), res);
+    return return_helper(lobbies.addPlayer(code, id, nickname), res);
 });
 
 
-// Removes a player from the specified lobby
-//   Required: {"lobby_code": *INSERT*, "socket_id": *INSERT*}
-//   Returns: List of players in the lobby with @lobby_code
 router.delete("/removePlayer", (req, res) => {
     const code = req.body.lobby_code;
     const id = req.body.socket_id;
@@ -118,21 +232,25 @@ router.delete("/removePlayer", (req, res) => {
     if (!id || !code) 
         return res.status(400).json({msg: "lobby_code, socket_id required"});
 
-    return return_helper(lobbies_map.removePlayer(code, id), res);
+    return return_helper(lobbies.removePlayer(code, id), res);
 });
 
 
+// Default page (Should probably remove)
+router.get('/', (req, res) => {
+    res.end("Default page");
+});
+
+
+// Helps return the appropriate HTTP status code based on requested function returns
 function return_helper(function_result, res) {
     if (function_result.passed == true) {
         return res.status(200).json(function_result.data);
     }
     else {
-        return res.status(400).json({msg: function_result.msg});
+        return res.status(400).json({msg: "Server error. Check server console for more info."});
     }
 }
 
 
-router.get('/', (req, res) => {
-    res.end("Hello");
-});
 module.exports = router;
