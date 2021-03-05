@@ -35,7 +35,7 @@ function Join() {
         <form className={classes.textfield} noValidate autoComplete="off">
           <TextField id="outlined-basic" label="Nickname" variant="outlined" />
         </form>
-        <Button variant="contained" color="primary">
+        <Button variant="contained" color="primary" href="/lobby">
           Join Game
         </Button>
       </Box>
