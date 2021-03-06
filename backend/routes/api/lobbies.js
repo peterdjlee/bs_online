@@ -15,7 +15,7 @@ ________________________________________________________________________________
                 }
 ____________________________________________________________________________________________
     /api/lobbies/info - Displays all or specified lobby information
-        Type: GET
+        Type: POST
         Req: Either lobby code for specific or optionally set "all" to true for all lobbies
             ex. {
                     "lobby_code": "ajeX",
@@ -143,6 +143,29 @@ ________________________________________________________________________________
                     ]
                 }
 ________________________________________________________________________________________________
+    /api/lobbies/exists - Check if a lobby with given code exists
+        Type: POST
+        Req: lobby code to check
+            ex. {
+                    "lobby_code": "AAAA"
+                }
+        Ret: bool exists to represent result
+            ex. {
+                    "exists": false
+                }
+________________________________________________________________________________________________
+    /api/lobbies/started - Check if a lobby with given code started
+        Type: POST
+        Req: lobby code to check
+            ex. {
+                    "lobby_code": "AAAA"
+                }
+        Ret: bool exists to represent result
+            ex. {
+                    "started": false
+                }
+
+
 */
 
 const express = require("express");
@@ -162,7 +185,7 @@ router.post("/create", (req, res) => {
 });
 
 
-router.get("/info", (req, res) => {
+router.post("/info", (req, res) => {
     // Returning all lobbies operation of /info has priority
     if (req.body.all === true) {
         return return_helper(lobbies.getLobbyAll(), res);
@@ -236,9 +259,27 @@ router.delete("/removePlayer", (req, res) => {
 });
 
 
-// Default page (Should probably remove)
-router.get('/', (req, res) => {
-    res.end("Default page");
+router.post("/exists", (req, res) => {
+    const code = req.body.lobby_code;
+    
+    if (!code)
+        return res.status(400).json({msg: "lobby_code required"});
+    
+    return lobbies.lobbyExists(code) ?
+        res.status(200).json({exists: true}):
+        res.status(200).json({exists: false});
+})
+
+
+router.post("/started", (req, res) => {
+    const code = req.body.lobby_code;
+    
+    if (!code)
+        return res.status(400).json({msg: "lobby_code required"});
+    
+    return lobbies.lobbyStarted(code) ?
+        res.status(200).json({started: true}):
+        res.status(200).json({started: false});
 });
 
 

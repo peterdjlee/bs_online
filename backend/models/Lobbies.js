@@ -195,6 +195,13 @@ class Lobbies {
         return (this.lobbies_map.has(code));
     }
 
+    lobbyStarted(code) {
+        if (this.lobbyExists(code))
+            return (this.lobbies_map.get(code).game_started);
+        else
+            return false;
+    }
+
     getPlayerCount(code) {
         return this.lobbies_map.get(code).players.length;
     }
