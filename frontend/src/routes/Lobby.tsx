@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core';
 import { Box, Button, Typography, Divider } from '@material-ui/core';
 import { SocketContext } from '../util/socket';
 import { PlayerContext } from '../util/player';
+import { RouterProps, withRouter } from 'react-router-dom';
 
 const useStyles = makeStyles({
   subtitle: {
@@ -39,18 +40,22 @@ const useStyles = makeStyles({
   },
 });
 
-function Lobby() {
+function Lobby(props: RouterProps) {
   const classes = useStyles();
   const [players, setPlayers] = useState([]);
   const player = useContext(PlayerContext);
   const socket = useContext(SocketContext);
   useEffect(() => {
-    socket.on('ret/lobbies/addPlayer', json =>
-      setPlayers(json.players.map(p => p.nickname)));
-    socket.emit('api/lobbies/addPlayer', {
-      lobby_code: player.room,
-      nickname: player.nickname
-    });
+    if (player.nickname === '' || player.room === '') {
+      props.history.push('/');
+    } else {
+      socket.on('ret/lobbies/addPlayer', json =>
+        setPlayers(json.players.map(p => p.nickname)));
+      socket.emit('api/lobbies/addPlayer', {
+        lobby_code: player.room,
+        nickname: player.nickname
+      });
+    }
   }, []);
   return (
     <Box
@@ -97,4 +102,4 @@ function Lobby() {
   )
 }
 
-export default Lobby;
+export default withRouter(Lobby);
