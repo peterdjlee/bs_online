@@ -11,8 +11,10 @@ const http = require('http');
 const server = http.createServer(app);
 
 // Socket.io
-const socketio = require('socket.io');
-const io = socketio(server);
+const { Server } = require('socket.io');
+const io = new Server(server, {
+  allowEIO3: true
+});
 
 // Router for testing pages
 app.use('/', require("./controller/test_router"));
