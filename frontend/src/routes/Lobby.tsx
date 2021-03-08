@@ -76,7 +76,7 @@ function Lobby() {
         alignItems="center">
         <Typography className={classes.title}>Players</Typography>
         <Divider className={classes.divider} orientation="horizontal"></Divider>
-        {players.map((player) => <Typography className={classes.player}>{player}</Typography>)}
+        {players.map((player, i) => <Typography key={i} className={classes.player}>{player}</Typography>)}
       </Box>
       <Button variant="contained" color="primary" className={classes.startButton}>
         Start Game
