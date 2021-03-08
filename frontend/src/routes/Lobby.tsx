@@ -74,7 +74,7 @@ function Lobby(props: RouterProps) {
         <Box width="100vh"
           display="flex"
           alignItems="center">
-          <Typography className={classes.link}>bsonline.com/3jus</Typography>
+          <Typography className={classes.link}>{window.location.host}/join/{player.room}</Typography>
         </Box>
         <Box
           borderLeft={1}
