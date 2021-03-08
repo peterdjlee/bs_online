@@ -195,6 +195,16 @@ class Lobbies {
         return this.lobbyExists(code) && !this.lobbyStarted(code) && !this.lobbyFull(code); 
     }
 
+    lobbyEntryMsg(code) {
+        if (!this.lobbyExists(code))
+            return {allow_entry: false, msg: "Requested lobby does not exist"};
+        if (this.lobbyStarted(code))
+            return {allow_entry: false, msg: "Lobby game has already started"};
+        if (this.lobbyFull(code))
+            return {allow_entry: false, msg: "Lobby has reached the maximum number of players"};
+        return {allow_entry: true, msg: ""};
+    }
+
     lobbyFull(code) {
         return (this.lobbies_map.get(code).players.length >= this.lobbies_map.get(code).max_players);
     }

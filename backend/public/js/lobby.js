@@ -11,11 +11,13 @@ xhr.onreadystatechange=function(){
         const json = JSON.parse(xhr.responseText);
 
         // Check if lobby allows new players
+        /*
         if (json.allowed == false) {
             window.location.href = "../../";
         }
+        */
 
-        else {
+        
             // Lobby joine allowed -> begin socket stuff
             const socket = io();
             socket.emit("AddPlayer", 
@@ -74,6 +76,9 @@ xhr.onreadystatechange=function(){
                     start_button.innerText = "Start Game";
                 }
             });
+
+            socket.on("AddPlayerError", data => {
+                console.log(data.error);
+            });
         }
     }
-}

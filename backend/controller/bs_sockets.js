@@ -17,19 +17,29 @@ exports = module.exports = (io) => {
             const code = info.lobby_code;
             const id = socket.id;
             const nickname = info.nickname ? info.nickname: "Player";
-
+            
             /*
             if (!code) 
                 socket.emit("ret/lobbies/addPlayer", {players: []});
             */
+            
+            // Check if lobby entry is allowed
+            const add_status = lobbies.lobbyEntryMsg(code);
 
-            const data = lobbies.addPlayer(code, id, nickname).data;
-            socket.join(code);
-            player_to_lobby.set(id, code);
+            if (add_status.allow_entry) {
+                const data = lobbies.addPlayer(code, id, nickname).data;
+                socket.join(code);
+                player_to_lobby.set(id, code);
 
-            // Broadcast emits to everyone in room but player -> emit again to player
-            socket.emit("UpdatePlayerList", {players: data.players});
-            socket.broadcast.to(code).emit("UpdatePlayerList", {players: data.players});
+                // Broadcast emits to everyone in room but player -> emit again to player
+                socket.emit("UpdatePlayerList", {players: data.players});
+                socket.broadcast.to(code).emit("UpdatePlayerList", {players: data.players});
+            }
+
+            else {
+                socket.emit("AddPlayerError", {error: add_status.msg});
+            }
+
         });
 
 
