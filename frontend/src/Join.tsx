@@ -23,23 +23,20 @@ const useStyles = makeStyles({
 function Join() {
   const classes = useStyles();
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box
-        height="100vh"
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center">
-        <Typography className={classes.title}>Enter your name</Typography>
-        <form className={classes.textfield} noValidate autoComplete="off">
-          <TextField id="outlined-basic" label="Nickname" variant="outlined" />
-        </form>
-        <Button variant="contained" color="primary" href="/lobby">
-          Join Game
-        </Button>
-      </Box>
-    </ThemeProvider>
+    <Box
+      height="100vh"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center">
+      <Typography className={classes.title}>Enter your name</Typography>
+      <form className={classes.textfield} noValidate autoComplete="off">
+        <TextField id="outlined-basic" label="Nickname" variant="outlined" />
+      </form>
+      <Button variant="contained" color="primary" href="/lobby">
+        Join Game
+      </Button>
+    </Box>
   )
 }
 export default Join;

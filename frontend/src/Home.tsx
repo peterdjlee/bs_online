@@ -16,23 +16,20 @@ const useStyles = makeStyles({
   }
 });
 
-function App() {
+function Home() {
   const classes = useStyles();
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box
-        height="100vh"
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center">
-        <Typography className={classes.title}>BS Online</Typography>
-        <Button variant="contained" color="primary" href="/join">
-          Create a Game
+    <Box
+      height="100vh"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center">
+      <Typography className={classes.title}>BS Online</Typography>
+      <Button variant="contained" color="primary" href="/join">
+        Create a Game
         </Button>
-      </Box>
-    </ThemeProvider>
+    </Box>
   )
 }
-export default App;
+export default Home;

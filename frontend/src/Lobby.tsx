@@ -2,13 +2,6 @@ import React from 'react';
 import { createMuiTheme, CssBaseline, makeStyles, ThemeProvider } from '@material-ui/core';
 import { Box, Button, Typography, Divider } from '@material-ui/core';
 
-const theme = createMuiTheme({
-  typography: {
-    fontFamily: 'Schoolbell',
-  },
-});
-
-
 const useStyles = makeStyles({
   subtitle: {
     fontSize: "20px",
@@ -48,50 +41,47 @@ function Lobby() {
   const classes = useStyles();
   const players = ["peetskeet", "shaq", "shaq2"];
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline/>
+    <Box
+      height="100vh"
+      display="flex"
+      flexDirection="column"
+      alignItems="center">
+      <Typography className={classes.subtitle}>Invite</Typography>
       <Box
-        height="100vh"
+        border={1}
+        borderRadius="borderRadius"
+        borderColor="grey.400"
+        flexDirection="row"
+        display="flex"
+        width="300px">
+        <Box width="100vh"
+          display="flex"
+          alignItems="center">
+          <Typography className={classes.link}>bsonline.com/3jus</Typography>
+        </Box>
+        <Box
+          borderLeft={1}
+          borderColor="grey.400"
+          alignItems="center"
+          display="flex">
+          <Button color="primary" className={classes.copyButton}>
+            Copy
+          </Button>
+        </Box>
+      </Box>
+      <Box
+        height="450px"
         display="flex"
         flexDirection="column"
         alignItems="center">
-        <Typography className={classes.subtitle}>Invite</Typography>
-        <Box 
-          border={1}
-          borderRadius="borderRadius"
-          borderColor="grey.400"
-          flexDirection="row"
-          display="flex"
-          width="300px">
-          <Box width="100vh"
-            display="flex"
-            alignItems="center">
-            <Typography className={classes.link}>bsonline.com/3jus</Typography>
-          </Box>
-          <Box
-            borderLeft={1}
-            borderColor="grey.400"
-            alignItems="center"
-            display="flex">
-            <Button color="primary" className={classes.copyButton}>
-              Copy
-            </Button>
-          </Box>
-        </Box>
-        <Box
-          height="450px"
-          display="flex"
-          flexDirection="column"
-          alignItems="center">
-          <Typography className={classes.title}>Players</Typography>
-          <Divider className={classes.divider} orientation="horizontal"></Divider>
-          {players.map((player) => <Typography className={classes.player}>{player}</Typography>)}
-        </Box>
-        <Button variant="contained" color="primary" className={classes.startButton}>
-          Start Game
-        </Button>
+        <Typography className={classes.title}>Players</Typography>
+        <Divider className={classes.divider} orientation="horizontal"></Divider>
+        {players.map((player) => <Typography className={classes.player}>{player}</Typography>)}
       </Box>
-    </ThemeProvider>
+      <Button variant="contained" color="primary" className={classes.startButton}>
+        Start Game
+        </Button>
+    </Box>
   )
 }
 
