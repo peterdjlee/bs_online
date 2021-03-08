@@ -24,6 +24,7 @@ const router = (
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/join" component={Join} />
+          <Route exact path="/join/:room" component={Join} />
           <Route exact path="/lobby" component={Lobby} />
 
           <Route exact path="/*" render={() => <Redirect to="/" />} />

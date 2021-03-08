@@ -1,6 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core';
 import { Box, Button, Typography } from '@material-ui/core';
+import { RouterProps, withRouter } from 'react-router-dom';
 
 const useStyles = makeStyles({
   title: {
@@ -9,8 +10,13 @@ const useStyles = makeStyles({
   }
 });
 
-function Home() {
+function Home(props: RouterProps) {
   const classes = useStyles();
+  const onCreate = () => {
+    fetch('/api/lobbies/create', { method: 'POST' })
+      .then(res => res.json())
+      .then(json => props.history.push(`/join/${json.lobby_code}`));
+  }
   return (
     <Box
       height="100vh"
@@ -19,10 +25,10 @@ function Home() {
       alignItems="center"
       justifyContent="center">
       <Typography className={classes.title}>BS Online</Typography>
-      <Button variant="contained" color="primary" href="/join">
+      <Button onClick={onCreate} variant="contained" color="primary">
         Create a Game
       </Button>
     </Box>
   )
 }
-export default Home;
+export default withRouter(Home);
