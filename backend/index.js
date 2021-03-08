@@ -16,8 +16,8 @@ const io = new Server(server, {
   allowEIO3: true
 });
 
-// Router for testing pages
-app.use('/', require("./controller/test_router"));
+// // Router for testing pages
+// app.use('/', require("./controller/test_router"));
 
 // Socket io stuff
 app.use(express.static(path.join(__dirname, "public")));
