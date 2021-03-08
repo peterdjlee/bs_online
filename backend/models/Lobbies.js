@@ -199,11 +199,10 @@ class Lobbies {
         return (this.lobbies_map.get(code).players.length >= this.lobbies_map.get(code).max_players);
     }
 
-
     lobbyExists(code) {
         return (this.lobbies_map.has(code));
     }
-
+    
     lobbyStarted(code) {
         if (this.lobbyExists(code))
             return (this.lobbies_map.get(code).game_started);

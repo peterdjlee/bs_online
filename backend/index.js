@@ -11,15 +11,17 @@ const http = require('http');
 const server = http.createServer(app);
 
 // Socket.io
-const socketio = require('socket.io');
-const io = socketio(server);
+const { Server } = require('socket.io');
+const io = new Server(server, {
+  allowEIO3: true
+});
 
-// Router for testing pages
+// Router for testing pages COMMENT OUT LATER
 app.use('/', require("./controller/test_router"));
 
 // Socket io stuff
 app.use(express.static(path.join(__dirname, "public")));
-const lobby_socket = require("./controller/lobbies_socket")(io);
+const lobby_socket = require("./controller/bs_sockets")(io);
 
 
 // lobbies API Route
