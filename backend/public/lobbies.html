@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>BS Lobby</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <base href="/">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+
+        <div id="lobby-banner">AAAA</div>
+        
+        <div id="change-name">
+            <form id="name-form">
+                <input id="nickname" type="text" id="username" placeholder="Create a nickname" required/>
+                <button type="submit" id="change-name-bt">Set</button>
+            </form>
+        </div>
+
+        <div id="start">
+            <form id="start-form">
+                <button type="submit" id="start-button">Start Game</button>
+            </form>
+        </div>
+        <br>
+
+        <div id="players">
+            <ul>
+                <li class="no-bullet-list">TEST</li>
+                <li class="no-bullet-list">TEST 2</li>
+            </ul>
+        </div>
+
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="js/lobby.js"></script>
+    </body>
+</html>

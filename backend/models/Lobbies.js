@@ -191,6 +191,15 @@ class Lobbies {
 
 
     // Helper Functions for this class' methods
+    lobbyEntry(code) {
+        return this.lobbyExists(code) && !this.lobbyStarted(code) && !this.lobbyFull(code); 
+    }
+
+    lobbyFull(code) {
+        return (this.lobbies_map.get(code).players.length >= this.lobbies_map.get(code).max_players);
+    }
+
+
     lobbyExists(code) {
         return (this.lobbies_map.has(code));
     }

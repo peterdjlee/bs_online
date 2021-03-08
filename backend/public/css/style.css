@@ -1,0 +1,59 @@
+#users {
+	font-size: 16px;
+	padding: 15px;
+	background-color: aqua;
+	text-align: center;
+}
+
+#center-align {
+	margin: auto;
+	text-align: center;
+}
+
+#create-lobby {
+	font-size: 36px;
+	background-color: #4Caf50;
+	color:white;
+	display:block;
+	margin:auto;
+	width: 30%;
+	align-items: center;
+}
+
+#create-lobby:hover{
+	background-color: darkgreen;
+}
+
+#lobby-banner  {
+	font-size: 100px;
+	text-align: center;
+	background-color: #4Caf50;
+	width: 50%;
+	margin: auto;
+	border-radius: 20px;
+}
+
+#players {
+	background-color: lightblue;
+	width: 75%;
+	margin: auto;
+	font-size: 40px;
+	text-align: center;
+}
+
+.no-bullet-list {
+	list-style-type: none;
+}
+
+#change-name {
+	font-size: 50px;
+	text-align: center;
+}
+
+#start {
+	text-align: center;
+}
+
+#start-button {
+	background-color: lightgreen;
+}

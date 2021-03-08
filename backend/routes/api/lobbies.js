@@ -282,6 +282,17 @@ router.post("/started", (req, res) => {
         res.status(200).json({started: false});
 });
 
+router.post("/entry", (req, res) => {
+    const code = req.body.lobby_code;
+
+    if (!code)
+        return res.status(400).json({msg: "lobby_code required"});
+    
+    return lobbies.lobbyEntry(code) ?
+        res.status(200).json({allowed: true}):
+        res.status(200).json({allowed: false});
+});
+
 
 // Helps return the appropriate HTTP status code based on requested function returns
 function return_helper(function_result, res) {
