@@ -9,6 +9,7 @@ import Home from './routes/Home';
 import Join from './routes/Join';
 import Lobby from './routes/Lobby';
 import { socket, SocketContext } from './util/socket';
+import { defaultPlayer, PlayerContext } from './util/player';
 
 const theme = createMuiTheme({
   typography: {
@@ -18,19 +19,20 @@ const theme = createMuiTheme({
 
 const router = (
   <SocketContext.Provider value={socket}>
-    <ThemeProvider theme={theme}>
-      <CssBaseline/>
-      <BrowserRouter>
-        <Switch>
-          <Route exact path="/" component={Home} />
-          <Route exact path="/join" component={Join} />
-          <Route exact path="/join/:room" component={Join} />
-          <Route exact path="/lobby" component={Lobby} />
+    <PlayerContext.Provider value={defaultPlayer}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <Switch>
+            <Route exact path="/" component={Home} />
+            <Route exact path="/join/:room" component={Join} />
+            <Route exact path="/lobby" component={Lobby} />
 
-          <Route exact path="/*" render={() => <Redirect to="/" />} />
-        </Switch>
-      </BrowserRouter>
-    </ThemeProvider>
+            <Route exact path="/*" render={() => <Redirect to="/" />} />
+          </Switch>
+        </BrowserRouter>
+      </ThemeProvider>
+    </PlayerContext.Provider>
   </SocketContext.Provider>
 )
 
