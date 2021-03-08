@@ -20,7 +20,7 @@ const io = new Server(server, {
 // app.use('/', require("./controller/test_router"));
 
 // Socket io stuff
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "public")));
 const lobby_socket = require("./controller/lobbies_socket")(io);
 
 
