@@ -28,7 +28,7 @@ function Home() {
       <Typography className={classes.title}>BS Online</Typography>
       <Button variant="contained" color="primary" href="/join">
         Create a Game
-        </Button>
+      </Button>
     </Box>
   )
 }

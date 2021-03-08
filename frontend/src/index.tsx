@@ -5,9 +5,9 @@ import { Redirect, Route, BrowserRouter, Switch } from 'react-router-dom';
 import { createMuiTheme, CssBaseline, ThemeProvider } from '@material-ui/core';
 
 import './index.css';
-import Home from './Home';
-import Join from './Join';
-import Lobby from './Lobby';
+import Home from './routes/Home';
+import Join from './routes/Join';
+import Lobby from './routes/Lobby';
 import { socket, SocketContext } from './util/socket';
 
 const theme = createMuiTheme({

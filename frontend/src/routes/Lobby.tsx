@@ -80,7 +80,7 @@ function Lobby() {
       </Box>
       <Button variant="contained" color="primary" className={classes.startButton}>
         Start Game
-        </Button>
+      </Button>
     </Box>
   )
 }
