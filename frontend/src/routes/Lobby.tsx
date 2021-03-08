@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { Box, Button, Typography, Divider } from '@material-ui/core';
+import { SocketContext } from '../util/socket';
+import { PlayerContext } from '../util/player';
 
 const useStyles = makeStyles({
   subtitle: {
@@ -39,7 +41,17 @@ const useStyles = makeStyles({
 
 function Lobby() {
   const classes = useStyles();
-  const players = ["peetskeet", "shaq", "shaq2"];
+  const [players, setPlayers] = useState([]);
+  const player = useContext(PlayerContext);
+  const socket = useContext(SocketContext);
+  useEffect(() => {
+    socket.on('ret/lobbies/addPlayer', json =>
+      setPlayers(json.players.map(p => p.nickname)));
+    socket.emit('api/lobbies/addPlayer', {
+      lobby_code: player.room,
+      nickname: player.nickname
+    });
+  }, []);
   return (
     <Box
       height="100vh"

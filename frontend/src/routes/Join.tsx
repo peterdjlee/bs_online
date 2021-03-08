@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { Box, Button, Typography, TextField } from '@material-ui/core';
+import { RouterProps, useParams, withRouter } from 'react-router-dom';
+import { PlayerContext } from '../util/player';
 
 const useStyles = makeStyles({
   title: {
@@ -13,8 +15,17 @@ const useStyles = makeStyles({
   }
 });
 
-function Join() {
+function Join(props: RouterProps) {
   const classes = useStyles();
+  const [nickname, setNickname] = useState('');
+  const { room } = useParams<{ room: string }>();
+  const player = useContext(PlayerContext);
+  const onSubmit = () => {
+    if (nickname === '') return;
+    player.nickname = nickname;
+    player.room = room;
+    props.history.push(`/lobby`);
+  }
   return (
     <Box
       height="100vh"
@@ -23,13 +34,16 @@ function Join() {
       alignItems="center"
       justifyContent="center">
       <Typography className={classes.title}>Enter your name</Typography>
-      <form className={classes.textfield} noValidate autoComplete="off">
-        <TextField id="outlined-basic" label="Nickname" variant="outlined" />
-      </form>
-      <Button variant="contained" color="primary" href="/lobby">
+      <TextField
+        className={classes.textfield}
+        label="Nickname"
+        variant="outlined"
+        onChange={event => setNickname(event.target.value)}
+        onSubmit={onSubmit} />
+      <Button variant="contained" color="primary" onClick={onSubmit}>
         Join Game
       </Button>
     </Box>
   )
 }
-export default Join;
+export default withRouter(Join);
