@@ -45,6 +45,7 @@ function Lobby(props: RouterProps) {
   const [players, setPlayers] = useState([]);
   const player = useContext(PlayerContext);
   const socket = useContext(SocketContext);
+  const gameLink = window.location.host + "/join/" + player.room;
   useEffect(() => {
     if (player.nickname === '' || player.room === '') {
       props.history.push('/');
@@ -74,14 +75,17 @@ function Lobby(props: RouterProps) {
         <Box width="100vh"
           display="flex"
           alignItems="center">
-          <Typography className={classes.link}>{window.location.host}/join/{player.room}</Typography>
+          <Typography className={classes.link}>{gameLink}</Typography>
         </Box>
         <Box
           borderLeft={1}
           borderColor="grey.400"
           alignItems="center"
           display="flex">
-          <Button color="primary" className={classes.copyButton}>
+          <Button 
+            color="primary" 
+            className={classes.copyButton}
+            onClick={() => {navigator.clipboard.writeText(gameLink)}}>
             Copy
           </Button>
         </Box>
