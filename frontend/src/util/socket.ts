@@ -8,10 +8,10 @@ class MockSocketIO {
   listeners: object;
 
   constructor() {
-    this.ws = new WebSocket(SOCKET_URI);
     this.listeners = {};
+    this.ws = new WebSocket(SOCKET_URI);
     this.ws.onmessage = (msg: MessageEvent) => {
-      if (msg.data.slice(0,2) !== "42") return;
+      if (msg.data.slice(0, 2) !== "42") return;
       const data = JSON.parse(msg.data.slice(2));
       const eventType = data[0];
       const args = data.slice(1);
@@ -20,6 +20,13 @@ class MockSocketIO {
       } else {
         throw Error(`There are no listeners for eventType: ${eventType}`);
       }
+    }
+    this.ws.onopen = () => {
+      // ping every 3 seconds
+      setInterval(() => this.ws.send('2'), 3000);
+    }
+    this.ws.onclose = () => {
+      console.log('Socket is closing...');
     }
   }
 
