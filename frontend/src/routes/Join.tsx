@@ -1,13 +1,6 @@
 import React from 'react';
-import { createMuiTheme, CssBaseline, makeStyles, ThemeProvider } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import { Box, Button, Typography, TextField } from '@material-ui/core';
-
-const theme = createMuiTheme({
-  typography: {
-    fontFamily: 'Schoolbell',
-  },
-});
-
 
 const useStyles = makeStyles({
   title: {
