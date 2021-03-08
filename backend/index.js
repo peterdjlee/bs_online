@@ -27,5 +27,9 @@ const lobby_socket = require("./controller/lobbies_socket")(io);
 // lobbies API Route
 app.use('/api/lobbies', require("./routes/api/lobbies"));
 
+let staticServe = express.static(path.join(__dirname, '../frontend/build'));
+app.use("/", staticServe);
+app.use("*", staticServe);
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server started on port: ${PORT}`));

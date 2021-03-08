@@ -1,7 +1,7 @@
 import { createContext } from "react";
 
-// const SOCKET_URI = `ws://${window.location.host}/socket.io/?EIO=3&transport=websocket`;
-const SOCKET_URI = "ws://localhost:5000/socket.io/?EIO=3&transport=websocket";
+const SOCKET_URI = `wss://${window.location.host}/socket.io/?EIO=3&transport=websocket`;
+// const SOCKET_URI = "ws://localhost:5000/socket.io/?EIO=3&transport=websocket";
 
 class MockSocketIO {
   ws: WebSocket;
