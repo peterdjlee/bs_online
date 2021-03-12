@@ -2,14 +2,21 @@ exports = module.exports = (io) => {
 
     /*
         Emits:
-            "UpdatePlayerList"
+            "UpdatePlayerList":
+                data passed: an array of objects { {string}socket_id, {string}nickname }
+                    [
+                        { socket_id: 'GZ2XNYoA_eqZIsINAAAF', nickname: 'A' },
+                        { socket_id: 'yh8ndG94sCbxo99NAAAL', nickname: 'B' },
+                        { socket_id: '5IkQqtS_BwaZDYYHAAAN', nickname: 'Player' }
+                    ]
             "UpdateLobbyState"
+                data passed: single object { {bool}started }
+                    {
+                        started: true
+                    }
     */
     
     const lobbies = require("../models/Lobbies");
-
-    // Quickly find what lobby a player is in
-    const player_to_lobby = new Map();
 
     io.on("connection", socket => {
 
@@ -18,28 +25,25 @@ exports = module.exports = (io) => {
             const id = socket.id;
             const nickname = info.nickname ? info.nickname: "Player";
             
-            /*
-            if (!code) 
-                socket.emit("ret/lobbies/addPlayer", {players: []});
-            */
-            
             // Check if lobby entry is allowed
-            const add_status = lobbies.lobbyEntryMsg(code);
+            const check = lobbies.allowEntry(code);
+            if (check.passed) {
 
-            if (add_status.allow_entry) {
-                const data = lobbies.addPlayer(code, id, nickname).data;
-                socket.join(code);
-                player_to_lobby.set(id, code);
+                // Check if adding player maintains lobby rules (ex. duplicate names)
+                const add_status = lobbies.addPlayer(code, id, nickname);
+                if (add_status.passed) {
 
-                // Broadcast emits to everyone in room but player -> emit again to player
-                socket.emit("UpdatePlayerList", {players: data.players});
-                socket.broadcast.to(code).emit("UpdatePlayerList", {players: data.players});
+                    socket.join(code);
+
+                    // Broadcast emits to everyone in room but player -> emit again to player
+                    socket.emit("UpdatePlayerList", {players: add_status.data.players});
+                    socket.broadcast.to(code).emit("UpdatePlayerList", {players: add_status.data.players});
+                }
+                else
+                    socket.emit("AddPlayerError", {msg: add_status.msg});
             }
-
-            else {
-                socket.emit("AddPlayerError", {error: add_status.msg});
-            }
-
+            else
+                socket.emit("AddPlayerError", {msg: check.msg});
         });
 
 
@@ -48,9 +52,14 @@ exports = module.exports = (io) => {
             const id = socket.id;
             const nickname = info.nickname;
 
-            const data = lobbies.changeNickname(code, id, nickname).data;
-            socket.emit("UpdatePlayerList", {players: data.players});
-            socket.broadcast.to(code).emit("UpdatePlayerList", {players: data.players});
+            // Attempt to change player name and emit events accordingly
+            const result = lobbies.setPlayerName(code, id, nickname);
+            if (result.passed) {
+                socket.emit("UpdatePlayerList", {players: result.data.players});
+                socket.broadcast.to(code).emit("UpdatePlayerList", {players: result.data.players});
+            }
+            else
+                socket.emit("ChangePlayerNameError", {msg: result.msg});
         })
 
 
@@ -58,11 +67,11 @@ exports = module.exports = (io) => {
             const code = info.lobby_code;
             const new_state = info.started;
 
-            if (lobbies.lobbyStarted(code) != new_state) {
+            if (lobbies.started(code) != new_state) {
                 if (new_state)
-                    lobbies.startLobby(code);
+                    lobbies.start(code);
                 else
-                    lobbies.stopLobby(code);
+                    lobbies.stop(code);
                 socket.emit("UpdateLobbyState", {started: new_state});
                 socket.broadcast.to(code).emit("UpdateLobbyState", {started: new_state});
             }
@@ -72,15 +81,14 @@ exports = module.exports = (io) => {
         socket.on("disconnect", () => {
             const id = socket.id;
 
-            if (player_to_lobby.has(id)) {
-                const code = player_to_lobby.get(id);
-                player_to_lobby.delete(id);
-
-                const data = lobbies.removePlayer(code, id).data;
+            const player_info = lobbies.getLobbyOf(id);
+            if (player_info.passed) {
+                const data = lobbies.removePlayer(player_info.data, id).data;
                 if(data.players.length == 0)
-                    lobbies.deleteLobby(code);
-                else
-                    socket.broadcast.to(code).emit("UpdatePlayerList", {players: data.players});
+                    const status = lobbies.delete(player_info.data);
+                else {
+                    socket.broadcast.to(player_info.data).emit("UpdatePlayerList", {players: data.players});
+                }
             }
         });
 

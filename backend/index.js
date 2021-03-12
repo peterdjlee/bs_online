@@ -23,7 +23,6 @@ app.use('/', require("./controller/test_router"));
 app.use(express.static(path.join(__dirname, "public")));
 const lobby_socket = require("./controller/bs_sockets")(io);
 
-
 // lobbies API Route
 app.use('/api/lobbies', require("./routes/api/lobbies"));
 

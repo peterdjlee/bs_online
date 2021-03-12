@@ -11,13 +11,11 @@ xhr.onreadystatechange=function(){
         const json = JSON.parse(xhr.responseText);
 
         // Check if lobby allows new players
-        /*
         if (json.allowed == false) {
             window.location.href = "../../";
         }
-        */
 
-        
+        else {
             // Lobby joine allowed -> begin socket stuff
             const socket = io();
             socket.emit("AddPlayer", 
@@ -77,8 +75,14 @@ xhr.onreadystatechange=function(){
                 }
             });
 
+            socket.on("ChangePlayerNameError", data => {
+                console.log(`Name change error: ${data.msg}`);
+            });
+
             socket.on("AddPlayerError", data => {
-                console.log(data.error);
+                console.log(`Add player error: ${data.msg}`);
+                window.location.href = "../../";
             });
         }
     }
+}

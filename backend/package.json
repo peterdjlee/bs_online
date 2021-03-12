@@ -5,12 +5,15 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "Jonathon, Umar, William",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
     "socket.io": "^3.1.2"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3"
   }
 }
