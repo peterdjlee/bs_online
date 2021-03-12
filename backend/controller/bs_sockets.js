@@ -85,7 +85,7 @@ exports = module.exports = (io) => {
             if (player_info.passed) {
                 const data = lobbies.removePlayer(player_info.data, id).data;
                 if(data.players.length == 0)
-                    const status = lobbies.delete(player_info.data);
+                    lobbies.delete(player_info.data);
                 else {
                     socket.broadcast.to(player_info.data).emit("UpdatePlayerList", {players: data.players});
                 }
