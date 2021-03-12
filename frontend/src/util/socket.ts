@@ -22,6 +22,7 @@ class MockSocketIO {
       }
     }
     this.ws.onopen = () => {
+      console.log('Socket just opened');
       // ping every 3 seconds
       setInterval(() => this.ws.send('2'), 3000);
     }
