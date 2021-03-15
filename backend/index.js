@@ -16,13 +16,9 @@ const io = new Server(server, {
   allowEIO3: true
 });
 
-// Router for testing pages
-app.use('/', require("./controller/test_router"));
-
 // Socket io stuff
 app.use(express.static(path.join(__dirname, "public")));
-const lobby_socket = require("./controller/lobbies_socket")(io);
-
+const lobby_socket = require("./controller/lobby_sockets")(io);
 
 // lobbies API Route
 app.use('/api/lobbies', require("./routes/api/lobbies"));

@@ -9,7 +9,7 @@ class StrGen{
         for (let i = 0; i < length; i+=1) {
             code += this.char_set.charAt(Math.floor(Math.random() * this.char_set_len));
         }
-        return code;
+        return `${code}`;
     }
 }
 

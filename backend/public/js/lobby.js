@@ -18,7 +18,7 @@ xhr.onreadystatechange=function(){
         else {
             // Lobby joine allowed -> begin socket stuff
             const socket = io();
-            socket.emit('api/lobbies/addPlayer', 
+            socket.emit("AddPlayer", 
                 {lobby_code: lobby_code});
 
             const display_lobby_code = document.getElementById('lobby-banner');
@@ -29,8 +29,7 @@ xhr.onreadystatechange=function(){
 
             display_lobby_code.innerText = lobby_code;
             
-            // More accurately = socket.on("UpdatePlayerLists")
-            socket.on("ret/lobbies/addPlayer", (json) => {
+            socket.on("UpdatePlayerList", (json) => {
                 var player_list = "";
                 (json.players).forEach(player => {
                     player_list += `<li class="no-bullet-list">`;
@@ -48,7 +47,7 @@ xhr.onreadystatechange=function(){
                 const nickname = e.target.elements.nickname.value;
                 e.target.elements.nickname.value = '';
 
-                socket.emit("api/lobbies/changeNickname", 
+                socket.emit("ChangePlayerName", 
                     {lobby_code: lobby_code,
                      nickname: nickname
                 });
@@ -58,21 +57,29 @@ xhr.onreadystatechange=function(){
             start_form.addEventListener("submit", (e) => {
                 e.preventDefault();
 
-                socket.emit("api/lobbies/start", 
-                    {lobby_code: lobby_code}
-                )
+                if (start_button.innerText == "Start Game")
+                    socket.emit("SetLobbyState", {lobby_code: lobby_code, started: true});
+                else
+                    socket.emit("SetLobbyState", {lobby_code: lobby_code, started: false});
             });
 
-            // More accurately = socket.on("GameStateChange"), state as in game has started or not
-            socket.on("ret/lobbies/start", (json) => {
-                if (json.started == true) {
-                    start_button.style.backgroundColor = "red";
-                    start_button.innerText = "Stop Game";
-                }
-                else {
-                    start_button.style.backgroundColor = "LightGreen";
-                    start_button.innerText = "Start Game";
-                }
+            socket.on("StartGame", data => {
+                start_button.style.backgroundColor = "red";
+                start_button.innerText = "Stop Game";
+            });
+
+            socket.on("StopGame", data => {
+                start_button.style.backgroundColor = "LightGreen";
+                start_button.innerText = "Start Game";
+            });
+
+            socket.on("ChangePlayerNameError", data => {
+                console.log(`Name change error: ${data.msg}`);
+            });
+
+            socket.on("AddPlayerError", data => {
+                console.log(`Add player error: ${data.msg}`);
+                window.location.href = "../../";
             });
         }
     }
