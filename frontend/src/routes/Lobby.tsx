@@ -50,9 +50,9 @@ function Lobby(props: RouterProps) {
     if (player.nickname === '' || player.room === '') {
       props.history.push('/');
     } else {
-      socket.on('ret/lobbies/addPlayer', json =>
+      socket.on('UpdatePlayerList', json =>
         setPlayers(json.players.map(p => p.nickname)));
-      socket.emit('api/lobbies/addPlayer', {
+      socket.emit('AddPlayer', {
         lobby_code: player.room,
         nickname: player.nickname
       });
