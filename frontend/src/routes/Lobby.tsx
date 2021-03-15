@@ -4,6 +4,7 @@ import { Box, Button, Typography, Divider } from '@material-ui/core';
 import { SocketContext } from '../util/socket';
 import { PlayerContext } from '../util/player';
 import { RouterProps, withRouter } from 'react-router-dom';
+import { NotificationContext } from '../util/notification';
 
 const useStyles = makeStyles({
   subtitle: {
@@ -45,6 +46,7 @@ function Lobby(props: RouterProps) {
   const [players, setPlayers] = useState([]);
   const player = useContext(PlayerContext);
   const socket = useContext(SocketContext);
+  const setNotification = useContext(NotificationContext);
   const gameLink = window.location.host + "/join/" + player.room;
   useEffect(() => {
     if (player.nickname === '' || player.room === '') {
@@ -52,6 +54,10 @@ function Lobby(props: RouterProps) {
     } else {
       socket.on('UpdatePlayerList', json =>
         setPlayers(json.players.map(p => p.nickname)));
+      socket.on('AddPlayerError', json => {
+        setNotification(json.msg);
+        props.history.goBack();
+      })
       socket.emit('AddPlayer', {
         lobby_code: player.room,
         nickname: player.nickname
@@ -82,10 +88,10 @@ function Lobby(props: RouterProps) {
           borderColor="grey.400"
           alignItems="center"
           display="flex">
-          <Button 
-            color="primary" 
+          <Button
+            color="primary"
             className={classes.copyButton}
-            onClick={() => {navigator.clipboard.writeText(gameLink)}}>
+            onClick={() => { navigator.clipboard.writeText(gameLink) }}>
             Copy
           </Button>
         </Box>
