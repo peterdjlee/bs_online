@@ -1,3 +1,5 @@
+const cards_generator = require("../utils/genCards");
+
 exports = module.exports = (io) => {
 
     /*
@@ -17,7 +19,7 @@ exports = module.exports = (io) => {
     */
     
     const lobbies = require("../models/Lobbies");
-
+    
     io.on("connection", socket => {
 
         socket.on("AddPlayer", info => {
