@@ -2,16 +2,18 @@ const card_gen = require("../utils/genCards");
 const NUM_CASES = 10;
 
 test("generates an array of 52 valid and unique cards", () => {
-    const valid_suits = ['c', 'h', 's', 'd'];
-    const valid_ranks = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'T', 'J', 'Q', 'K'];
-
     for (let i = 0; i < NUM_CASES; i += 1) {
         const new_deck = card_gen.newShuffledDeck();
 
         // Verify each element is a proper card representation
         new_deck.forEach(card => {
-            expect(valid_ranks.includes(card[0])).toBe(true);
-            expect(valid_suits.includes(card[1])).toBe(true);
+            // 14 valid ranks
+            expect(card[0]).toBeGreaterThanOrEqual(0);
+            expect(card[0]).toBeLessThan(14);
+
+            // 4 valid suits
+            expect(card[1]).toBeGreaterThanOrEqual(0);
+            expect(card[1]).toBeLessThan(4);
         });
 
         // Verify that the deck does not contain duplicate cards
@@ -70,7 +72,7 @@ test("shuffleAndDeal / deals expected number of cards to each player", () => {
     const arr_hands = card_gen.shuffleAndDeal(num_hands=5);
 
     arr_hands.forEach(hand => {
-        // 52 cards -> 5 players, every player should have 5 cards
+        // 52 cards -> 5 players, every player should have 10 cards
         expect(hand.length).toStrictEqual(10);
     });
 });
