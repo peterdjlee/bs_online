@@ -82,10 +82,10 @@ function Lobby(props: RouterProps) {
           borderColor="grey.400"
           alignItems="center"
           display="flex">
-          <Button 
-            color="primary" 
+          <Button
+            color="primary"
             className={classes.copyButton}
-            onClick={() => {navigator.clipboard.writeText(gameLink)}}>
+            onClick={() => { navigator.clipboard.writeText(gameLink) }}>
             Copy
           </Button>
         </Box>
