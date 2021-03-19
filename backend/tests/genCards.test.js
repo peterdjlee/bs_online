@@ -8,8 +8,8 @@ test("generates an array of 52 valid and unique cards", () => {
         // Verify each element is a proper card representation
         new_deck.forEach(card => {
             // 14 valid ranks
-            expect(card[0]).toBeGreaterThanOrEqual(0);
-            expect(card[0]).toBeLessThan(14);
+            expect(card[0]).toBeGreaterThanOrEqual(1);
+            expect(card[0]).toBeLessThan(15);
 
             // 4 valid suits
             expect(card[1]).toBeGreaterThanOrEqual(0);
