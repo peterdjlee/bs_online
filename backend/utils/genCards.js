@@ -5,11 +5,11 @@ class DeckOCards{
 
         /*
             Cards are represented by a tuple with 2 ints
-                *0-12 for the Rank
+                *1-13 for the Rank
                 *0-3 for the Suit
         */
         this.card_set = [];
-        for (let i = 0; i < 13; i+=1) {
+        for (let i = 1; i < 14; i+=1) {
             for(let j = 0; j < 4; j+=1) {
                 this.card_set.push([i, j])
             }
