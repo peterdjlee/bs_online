@@ -19,6 +19,7 @@ exports = module.exports = (io) => {
     */
     
     const lobbies = require("../models/Lobbies");
+    const games = require("../moodels/Games");
     
     io.on("connection", socket => {
 
@@ -73,8 +74,14 @@ exports = module.exports = (io) => {
             if (lobbies.started(code) != new_state) {
                 if (new_state) {
                     lobbies.start(code);
+                    games.create(code, lobbies.get(code).players);
                     socket.emit("StartGame" , {});
                     socket.broadcast.to(code).emit("StartGame", {});
+
+                    for(player in lobbies.get(code).players){
+                        io.to(player.socket_id).emit("updatePlayerHand", games.getPlayerHand(code, player.socket_id));
+                        io.to(player.socket_id).emit("updateOtherHands", games.getHandNums(code));
+                    }
                 }
                 else {
                     lobbies.stop(code)
