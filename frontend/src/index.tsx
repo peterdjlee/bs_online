@@ -8,6 +8,7 @@ import './index.css';
 import Home from './routes/Home';
 import Join from './routes/Join';
 import Lobby from './routes/Lobby';
+import Game from './routes/Game';
 import { socket, SocketContext } from './util/socket';
 import { defaultPlayer, PlayerContext } from './util/player';
 
@@ -24,7 +25,7 @@ const router = (
         <CssBaseline />
         <BrowserRouter>
           <Switch>
-            <Route exact path="/" component={Home} />
+            <Route exact path="/" component={Game} />
             <Route exact path="/join/:room" component={Join} />
             <Route exact path="/lobby" component={Lobby} />
 
