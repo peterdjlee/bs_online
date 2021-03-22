@@ -1,0 +1,30 @@
+export const rank = [
+  'A',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  'T',
+  'J',
+  'Q',
+  'K',
+];
+
+export const suit = [
+  'd',
+  'c',
+  'h',
+  's',
+];
+
+export function getCardString(card: number[]) {
+  return rank[card[0]-1] + suit[card[1]];
+}
+
+export function getCardArray(card: string) {
+  return [rank.indexOf(card.substr(0, 1)) + 1, suit.indexOf(card.substr(1))];
+}

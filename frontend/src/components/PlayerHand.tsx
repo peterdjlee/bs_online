@@ -6,8 +6,8 @@ function PlayerHand({ cards } : { cards: string[] }) {
   return (
     <div className="player-hand">
       {cards.map((card, i) => (
-        <div onClick={() => console.log('CLICK')}>
-          <Card key={i} card={card} height="150px" />
+        <div key={i} onClick={() => console.log('clicked:', card)}>
+          <Card card={card} height="150px" />
         </div>
       ))}
     </div>

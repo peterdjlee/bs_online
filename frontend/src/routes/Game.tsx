@@ -6,6 +6,7 @@ import PlayerHand from '../components/PlayerHand';
 import Table from '../components/Table';
 import { PlayerContext } from '../util/player';
 import { SocketContext } from '../util/socket';
+import { getCardString } from '../util/cards';
 
 const useStyles = makeStyles({
   title: {
@@ -26,15 +27,11 @@ function Game(props: RouterProps) {
   const [hand, setHand] = useState<string[]>([]);
 
   useEffect(() => {
-    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'K', 'Q', 'K', 'A'];
-    const suits = ['c', 'd', 'h', 's']
-    const cards: string[] = [];
-    for (let i = 0; i < 10; i++) {
-      cards.push(ranks[i % 14] + suits[i % 4]);
-    }
-    setHand(cards);
-    socket.on('UpdatePlayerHands', json => setHand(json));
-  })
+    socket.on('UpdatePlayerHand', cards => setHand(cards.map(getCardString)));
+    socket.on('UpdateOtherHands', console.log);
+    socket.on('StartTurn', console.log);
+    socket.emit('RequestGameInfo', { lobby_code: player.room });
+  }, []);
 
   return (
     <Box
