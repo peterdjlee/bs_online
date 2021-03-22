@@ -57,15 +57,19 @@ xhr.onreadystatechange=function(){
             start_form.addEventListener("submit", (e) => {
                 e.preventDefault();
 
-                if (start_button.innerText == "Start Game")
+                if (start_button.innerText == "Start Game") {
                     socket.emit("SetLobbyState", {lobby_code: lobby_code, started: true});
-                else
+                }
+                else {
                     socket.emit("SetLobbyState", {lobby_code: lobby_code, started: false});
+                    socket.emit("PlayCard", {lobby_code: lobby_code, cardPos: 0, pos:0});
+                }
             });
 
             socket.on("StartGame", data => {
                 start_button.style.backgroundColor = "red";
                 start_button.innerText = "Stop Game";
+                socket.emit("RequestGameInfo", {lobby_code: lobby_code});
             });
 
             socket.on("StopGame", data => {
@@ -80,6 +84,16 @@ xhr.onreadystatechange=function(){
             socket.on("AddPlayerError", data => {
                 console.log(`Add player error: ${data.msg}`);
                 window.location.href = "../../";
+            });
+
+            socket.on("UpdatePlayerHand", data => {
+                console.log("Player hand");
+                console.log(data);
+            });
+
+            socket.on("UpdateOtherHands", data => {
+                console.log("Other hand");
+                console.log(data);
             });
         }
     }

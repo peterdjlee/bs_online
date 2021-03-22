@@ -1,5 +1,3 @@
-const cards_generator = require("../utils/genCards");
-
 exports = module.exports = (io) => {
 
     /*
@@ -19,7 +17,7 @@ exports = module.exports = (io) => {
     */
     
     const lobbies = require("../models/Lobbies");
-    const games = require("../moodels/Games");
+    const games = require("../models/Games");
     
     io.on("connection", socket => {
 
@@ -74,16 +72,9 @@ exports = module.exports = (io) => {
             if (lobbies.started(code) != new_state) {
                 if (new_state) {
                     lobbies.start(code);
-                    games.create(code, lobbies.get(code).players);
+                    games.createGame(code, lobbies.get(code).data.players);
                     socket.emit("StartGame" , {});
                     socket.broadcast.to(code).emit("StartGame", {});
-
-                    for(player in lobbies.get(code).players){
-                        io.to(player.socket_id).emit("UpdatePlayerHand", games.getPlayerHand(code, player.socket_id));
-                        io.to(player.socket_id).emit("UpdateOtherHands", games.getAllHandSize(code);
-                    }
-
-                    io.to(code).emit("StartTurn", {position: 0, cardRank: 1});
                 }
                 else {
                     lobbies.stop(code)
@@ -92,26 +83,6 @@ exports = module.exports = (io) => {
                 } 
             }
         });
-
-        socket.on("PlayCard"), info => {
-            const code = info.lobby_code;
-            const id = socket.id;
-            const cardPos = info.cardPos;
-            const pos = info.pos;
-            
-            if(pos == games.getCurrentTurn(code) && id == games.getPlayerList(code)[pos]){
-                games.updatePile(code, cards);
-                games.playCards(code, pos, cardPos);
-                games.nextTurn(code);
-                info.centralPileNum = games.getPile(code).length;
-
-                io.to(code).emit("PlayedCard", info);
-                io.to(id).emit("UpdatePlayerHand", games.getPlayerHand(code, player.socket_id));
-                io.to(code).emit("UpdateOtherHands", games.getHandNums(code));
-
-            }
-
-        }
 
 
         socket.on("disconnect", () => {

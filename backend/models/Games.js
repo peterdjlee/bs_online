@@ -13,32 +13,30 @@ class Games{
         this.games_map.set(lobbyCode, 
         {
             centralPile: [],
-            playerHands: [],
+            playerHands: cards_generator.shuffleAndDeal(playerList.length),
             currentPlayerTurn: 0,
             currentCardRank: 1,
             playerList: playerList,
-            numOfLastCardsPlayed: 0
+            numOfLastCardsPlayed: 0,
+            playerPositions: new Map()
         });
 
         for(let i = 0; i < playerList.length; i++){
-
-            this.games_map.get(lobbyCode).playerHands = cards_generator.shuffleAndDeal(num_hands = playerList.length);
-
-            this.games_map.get(lobbyCode).playerPositions.set(i, playerList[i].socket_id);
+            this.games_map.get(lobbyCode).playerPositions.set(playerList[i].socket_id, i);
         }
-
     }
 
 
-    getPlayerHand(gameCode, pos){
-        return this.games_map.get(gameCode).playerHands[pos];
+    getPlayerHand(gameCode, socket_id){
+        const game = this.games_map.get(gameCode)
+        return game.playerHands[game.playerPositions.get(socket_id)];
     }
 
     getAllHandSize(gameCode){
         var HandSizes = []
         const game = this.games_map.get(gameCode);
 
-        for(let i = 0; i < playerList.length; i++){
+        for(let i = 0; i < game.playerList.length; i++){
             HandSizes.push({
                 position: i,
                 count: game.playerHands[i].length
@@ -76,12 +74,11 @@ class Games{
 
     playCards(gameCode, pos, cardPos){
         let hand = this.games_map.get(gameCode).playerHands[pos];
-        this.games_map.get(gameCode)numOfLastCardsPlayed = 0;
+        this.games_map.get(gameCode).numOfLastCardsPlayed = 0;
         for (position in cardPos){
             this.games_map.get(gameCode).centralPile.push(hand[position]);
-            this.games_map.get(gameCode)numOfLastCardsPlayed += 1;
+            this.games_map.get(gameCode).numOfLastCardsPlayed += 1;
         }
-
     }
 
     nextTurn(gameCode){
