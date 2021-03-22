@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { Box, Button, Typography } from '@material-ui/core';
 import { RouterProps, withRouter } from 'react-router-dom';
 import PlayerHand from '../components/PlayerHand';
 import Table from '../components/Table';
+import { PlayerContext } from '../util/player';
 
 const useStyles = makeStyles({
   title: {
@@ -19,6 +20,7 @@ const useStyles = makeStyles({
 
 function Game(props: RouterProps) {
   const classes = useStyles();
+  const player = useContext(PlayerContext);
   return (
     <Box
       height="100vh"
@@ -27,6 +29,7 @@ function Game(props: RouterProps) {
       alignItems="center"
       justifyContent="center">
       <Table></Table>
+      <Typography variant="h4">{player.nickname}'s hand:</Typography>
       <PlayerHand></PlayerHand>
       <Button variant="contained" className={classes.button} color="primary">
         Submit
