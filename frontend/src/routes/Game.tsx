@@ -33,6 +33,7 @@ function Game(props: RouterProps) {
       cards.push(ranks[i % 14] + suits[i % 4]);
     }
     setHand(cards);
+    socket.on('UpdatePlayerHands', json => setHand(json));
   })
 
   return (
