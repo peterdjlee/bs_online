@@ -27,9 +27,10 @@ const router = (
         <NotificationWrapper>
           <BrowserRouter>
             <Switch>
-              <Route exact path="/" component={Game} />
+              <Route exact path="/" component={Home} />
               <Route exact path="/join/:room" component={Join} />
               <Route exact path="/lobby" component={Lobby} />
+              <Route exact path="/play" component={Game} />
 
               <Route exact path="/*" render={() => <Redirect to="/" />} />
             </Switch>
