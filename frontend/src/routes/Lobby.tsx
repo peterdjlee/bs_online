@@ -36,6 +36,11 @@ const useStyles = makeStyles({
     fontSize: "20px",
     marginTop: "5px",
   },
+  activePlayer: {
+    fontSize: "20px",
+    marginTop: "5px",
+    fontWeight: "bold",
+  },
   startButton: {
     fontSize: "18px",
   },
@@ -113,13 +118,19 @@ function Lobby(props: RouterProps) {
         alignItems="center">
         <Typography className={classes.title}>Players</Typography>
         <Divider className={classes.divider} orientation="horizontal"></Divider>
-        {players.map((player, i) => <Typography key={i} className={classes.player}>{player}</Typography>)}
+        {players.map((p, i) => (
+          <Typography
+            key={i}
+            className={player.nickname === p ? classes.activePlayer : classes.player}>
+            {p}
+          </Typography>
+        ))}
       </Box>
       <Button
-      variant="contained"
-      color="primary"
-      className={classes.startButton}
-      onClick={handleStartGame}>
+        variant="contained"
+        color="primary"
+        className={classes.startButton}
+        onClick={handleStartGame}>
         Start Game
       </Button>
     </Box>
