@@ -11,6 +11,7 @@ import Lobby from './routes/Lobby';
 import Game from './routes/Game';
 import { socket, SocketContext } from './util/socket';
 import { defaultPlayer, PlayerContext } from './util/player';
+import NotificationWrapper from './components/NotificationWrapper';
 
 const theme = createMuiTheme({
   typography: {
@@ -23,15 +24,17 @@ const router = (
     <PlayerContext.Provider value={defaultPlayer}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <BrowserRouter>
-          <Switch>
-            <Route exact path="/" component={Game} />
-            <Route exact path="/join/:room" component={Join} />
-            <Route exact path="/lobby" component={Lobby} />
+        <NotificationWrapper>
+          <BrowserRouter>
+            <Switch>
+              <Route exact path="/" component={Game} />
+              <Route exact path="/join/:room" component={Join} />
+              <Route exact path="/lobby" component={Lobby} />
 
-            <Route exact path="/*" render={() => <Redirect to="/" />} />
-          </Switch>
-        </BrowserRouter>
+              <Route exact path="/*" render={() => <Redirect to="/" />} />
+            </Switch>
+          </BrowserRouter>
+        </NotificationWrapper>
       </ThemeProvider>
     </PlayerContext.Provider>
   </SocketContext.Provider>

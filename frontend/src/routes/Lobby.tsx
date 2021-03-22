@@ -4,6 +4,7 @@ import { Box, Button, Typography, Divider } from '@material-ui/core';
 import { SocketContext } from '../util/socket';
 import { PlayerContext } from '../util/player';
 import { RouterProps, withRouter } from 'react-router-dom';
+import { NotificationContext } from '../util/notification';
 
 const useStyles = makeStyles({
   subtitle: {
@@ -45,14 +46,19 @@ function Lobby(props: RouterProps) {
   const [players, setPlayers] = useState([]);
   const player = useContext(PlayerContext);
   const socket = useContext(SocketContext);
+  const setNotification = useContext(NotificationContext);
   const gameLink = window.location.host + "/join/" + player.room;
   useEffect(() => {
     if (player.nickname === '' || player.room === '') {
       props.history.push('/');
     } else {
-      socket.on('ret/lobbies/addPlayer', json =>
+      socket.on('UpdatePlayerList', json =>
         setPlayers(json.players.map(p => p.nickname)));
-      socket.emit('api/lobbies/addPlayer', {
+      socket.on('AddPlayerError', json => {
+        setNotification(json.msg);
+        props.history.goBack();
+      })
+      socket.emit('AddPlayer', {
         lobby_code: player.room,
         nickname: player.nickname
       });
