@@ -21,6 +21,12 @@ const useStyles = makeStyles({
 function Game(props: RouterProps) {
   const classes = useStyles();
   const player = useContext(PlayerContext);
+  const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'K', 'Q', 'K', 'A'];
+  const suits = ['c', 'd', 'h', 's']
+  const cards: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    cards.push(ranks[i % 14] + suits[i % 4]);
+  }
   return (
     <Box
       height="100vh"
@@ -30,7 +36,7 @@ function Game(props: RouterProps) {
       justifyContent="center">
       <Table></Table>
       <Typography variant="h4">{player.nickname}'s hand:</Typography>
-      <PlayerHand></PlayerHand>
+      <PlayerHand cards={cards} />
       <Button variant="contained" className={classes.button} color="primary">
         Submit
       </Button>
