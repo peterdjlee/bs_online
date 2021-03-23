@@ -36,6 +36,11 @@ const useStyles = makeStyles({
     fontSize: "20px",
     marginTop: "5px",
   },
+  activePlayer: {
+    fontSize: "20px",
+    marginTop: "5px",
+    fontWeight: "bold",
+  },
   startButton: {
     fontSize: "18px",
   },
@@ -48,6 +53,13 @@ function Lobby(props: RouterProps) {
   const socket = useContext(SocketContext);
   const setNotification = useContext(NotificationContext);
   const gameLink = window.location.host + "/join/" + player.room;
+  const handleStartGame = () => {
+    socket.emit('SetLobbyState', {
+      lobby_code: player.room,
+      started: true
+    });
+  }
+
   useEffect(() => {
     if (player.nickname === '' || player.room === '') {
       props.history.push('/');
@@ -57,13 +69,16 @@ function Lobby(props: RouterProps) {
       socket.on('AddPlayerError', json => {
         setNotification(json.msg);
         props.history.goBack();
-      })
+      });
+      socket.on('StartGame', () =>
+        props.history.push('/play'));
       socket.emit('AddPlayer', {
         lobby_code: player.room,
         nickname: player.nickname
       });
     }
   }, []);
+
   return (
     <Box
       height="100vh"
@@ -91,7 +106,7 @@ function Lobby(props: RouterProps) {
           <Button
             color="primary"
             className={classes.copyButton}
-            onClick={() => { navigator.clipboard.writeText(gameLink) }}>
+            onClick={() => navigator.clipboard.writeText(gameLink)}>
             Copy
           </Button>
         </Box>
@@ -103,9 +118,19 @@ function Lobby(props: RouterProps) {
         alignItems="center">
         <Typography className={classes.title}>Players</Typography>
         <Divider className={classes.divider} orientation="horizontal"></Divider>
-        {players.map((player, i) => <Typography key={i} className={classes.player}>{player}</Typography>)}
+        {players.map((p, i) => (
+          <Typography
+            key={i}
+            className={player.nickname === p ? classes.activePlayer : classes.player}>
+            {p}
+          </Typography>
+        ))}
       </Box>
-      <Button variant="contained" color="primary" className={classes.startButton}>
+      <Button
+        variant="contained"
+        color="primary"
+        className={classes.startButton}
+        onClick={handleStartGame}>
         Start Game
       </Button>
     </Box>

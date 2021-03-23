@@ -8,6 +8,7 @@ import './index.css';
 import Home from './routes/Home';
 import Join from './routes/Join';
 import Lobby from './routes/Lobby';
+import Game from './routes/Game';
 import { socket, SocketContext } from './util/socket';
 import { defaultPlayer, PlayerContext } from './util/player';
 import NotificationWrapper from './components/NotificationWrapper';
@@ -29,6 +30,7 @@ const router = (
               <Route exact path="/" component={Home} />
               <Route exact path="/join/:room" component={Join} />
               <Route exact path="/lobby" component={Lobby} />
+              <Route exact path="/play" component={Game} />
 
               <Route exact path="/*" render={() => <Redirect to="/" />} />
             </Switch>
