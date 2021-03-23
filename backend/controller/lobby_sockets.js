@@ -17,7 +17,8 @@ exports = module.exports = (io) => {
     */
     
     const lobbies = require("../models/Lobbies");
-
+    const games = require("../models/Games");
+    
     io.on("connection", socket => {
 
         socket.on("AddPlayer", info => {
@@ -71,6 +72,7 @@ exports = module.exports = (io) => {
             if (lobbies.started(code) != new_state) {
                 if (new_state) {
                     lobbies.start(code);
+                    games.createGame(code, lobbies.get(code).data.players);
                     socket.emit("StartGame" , {});
                     socket.broadcast.to(code).emit("StartGame", {});
                 }
