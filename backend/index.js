@@ -17,15 +17,19 @@ const io = new Server(server, {
 });
 
 // Router for testing pages COMMENT OUT LATER
-app.use('/', require("./controller/test_router"));
+// app.use('/', require("./controller/test_router"));
 
 // Socket io stuff
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "public")));
 const lobby_socket = require("./controller/lobby_sockets")(io);
 const bs_socket = require("./controller/bs_sockets")(io);
 
 // lobbies API Route
 app.use('/api/lobbies', require("./routes/api/lobbies"));
 
-const PORT = process.env.PORT || 5000;
+let staticServe = express.static(path.join(__dirname, '../frontend/build'));
+app.use("/", staticServe);
+app.use("*", staticServe);
+
+const PORT = 7000;
 server.listen(PORT, () => console.log(`Server started on port: ${PORT}`));
