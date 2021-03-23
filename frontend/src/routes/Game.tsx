@@ -42,7 +42,9 @@ function Game(props: RouterProps) {
       justifyContent="center">
       <Table></Table>
       <Typography variant="h4">{player.nickname}'s hand:</Typography>
-      <PlayerHand cards={hand} />
+      <Box width={1000}>
+        <PlayerHand cards={hand} />
+      </Box>
       <Button variant="contained" className={classes.button} color="primary">
         Submit
       </Button>
