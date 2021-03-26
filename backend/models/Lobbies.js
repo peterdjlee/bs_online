@@ -1,3 +1,5 @@
+const Lobby = require("../models/Lobby");
+
 // Util for generating random strings
 const str_generator = require("../utils/genRdmStr");
 
@@ -14,8 +16,8 @@ class Lobbies {
     constructor() {
         // Primary storage for this object (all lobbies)
         this.lobbies = new Map();
-
-        // Quickly locate a player's lobby (For socket disconnects)
+  
+        // Locate a player's lobby and local id
         this.all_players = new Map();
     };
 
@@ -39,43 +41,23 @@ class Lobbies {
             new_gen += 1;
         }
 
-        // Store lobby in map in this format
-        this.lobbies.set(new_lobby_code, 
-        {
-            lobby_code: new_lobby_code,
-            game_started: false,
-            max_players: max_players,
-            duplicate_names: dup_names,
-            players: []
-        });
-
+        // Create a Lobby object and store
+        this.lobbies.set(new_lobby_code, new Lobby(new_lobby_code, max_players, dup_names));
         return this.retSuccess({lobby_code: new_lobby_code});
     }
 
 
     /**
-     * Returns information about the requested lobby
-     * @param {string} lobby_code   code of lobby to get info for
-     * @returns {returns}           lobby info           
+     * Returns an array of nicknames for all existing players in lobby
+     * @param {string} lobby_code   Code of lobby to retrieve from
+     * @returns {returns}           returns an array of nicknames
      */
-    get(lobby_code) {
-        return (this.exists(lobby_code) ? 
-            this.retSuccess(this.lobbies.get(lobby_code)):
-            this.retError(`Cannot get info of lobby "${lobby_code}" (Doesn't exist)`));
-    }
+    getPlayers(lobby_code) {
+        // Make sure lobby exists
+        if (!this.exists(lobby_code))
+            return this.retError(`Cannot find lobby "${lobby_code}"`);
 
-
-    /**
-     * Returns information for all existing lobbies
-     * @returns {returns} all lobby info
-     */
-    getAll() {
-        // Create a new object literal and copy all elements from storage
-        var all_lobbies = {};
-        this.lobbies.forEach((value, key) => {
-            all_lobbies[key] = this.lobbies.get(key)
-        });
-        return this.retSuccess(all_lobbies);
+        return this.retSuccess(this.lobbies.get(lobby_code).getPlayers());
     }
 
 
@@ -91,39 +73,37 @@ class Lobbies {
     }
 
 
-    // TODO CONNECT WITH GAME LOGIC
     /**
      * Sets a lobby's game_started var to true
-     * @param {string} lobby_code   code of lobby to start
-     * @returns {returns}           No data will be returned
+     * @param {string} socket_id    id of a player that exists in lobby
+     * @returns {returns}           lobby code and a list of socket ids for the game object to use
      */
-    start(lobby_code) {
-        if (!this.exists(lobby_code))
-            return this.retError(`Cannot start lobby "${lobby_code}" (Doesn't exist)`);
-        else if (!this.started(lobby_code)) {
-            this.lobbies.get(lobby_code).game_started = true;
-            return this.retSuccess({});
-        }
-        else
-            return this.retError(`Cannot start lobby "${lobby_code}" (Already started)`);
+    start(socket_id, lobby_code) {
+
+        const lobby = this.lobbies.get(lobby_code);
+
+        // Attempt to start lobby and return data if successful
+        const result = lobby.start(socket_id)
+        return result.passed ? 
+            this.retSuccess({lobby_code: lobby_code, player_SIDs: lobby.getPlayerSIDs()}):
+            this.retError(result.msg);
     }
 
 
-    // TODO CONNECT WITH GAME LOGIC
     /**
      * Sets a lobby's game_started var to false
-     * @param {string} lobby_code   code of lobby to stop
-     * @returns {returns}           No data will be returned
+     * @param {string} socket_id    id of a player that exists in lobby
+     * @returns {returns}           lobby code
      */
-    stop(lobby_code) {
-        if (!this.exists(lobby_code))
-            return this.retError(`Cannot stop lobby "${lobby_code}" (Doesn't exist)`);
-        else if (this.started(lobby_code)) {
-            this.lobbies.get(lobby_code).game_started = false;
-            return this.retSuccess({});
-        }
-        else
-            return this.retError(`Cannot stop lobby "${lobby_code}" (Not started)`);
+    stop(socket_id, lobby_code) {
+
+        const lobby = this.lobbies.get(lobby_code);
+
+        // Attempt to stop lobby and return data if successful
+        const result = lobby.stop(socket_id)
+        return result.passed ?
+            this.retSuccess({lobby_code: lobby_code}):
+            this.retError(result.msg);
     }
 
 
@@ -134,34 +114,21 @@ class Lobbies {
      * @param {string} nickname     Nickname for the player (Optional)
      * @returns {returns}           List of players in the lobby (For convenience in updating player list)
      */
-    addPlayer(lobby_code, socket_id, nickname="Player") {
+    addPlayer(socket_id, lobby_code, nickname="Player") {
+        // Prepare lobby info
+        if (!this.exists(lobby_code))
+            return this.retError(`Cannot find lobby "${lobby_code}"`);
+        const lobby = this.lobbies.get(lobby_code);
 
-        // Make sure lobby will accept new players
-        const check = this.allowEntry(lobby_code);
-        if (!check.passed)
-            return this.retError(check.msg);
-
-        // Complies with lobby policies (Duplicate names)
-        if (this.lobbies.get(lobby_code).duplicate_names == false) {
-            if (this.hasName(lobby_code, nickname)) {
-                return this.retError(`Lobby "${lobby_code}" does not allow duplicate names`);
-            }
+        // Attempt to add player and return data if successful
+        const result = lobby.addPlayer(socket_id, nickname);
+        if (result.passed) {
+            this.all_players.set(socket_id, {lobby_code: lobby_code, local_id: result.data.local_id});
+            return this.retSuccess({players: lobby.getPlayers()});
         }
-
-        // Add player to list
-        this.lobbies.get(lobby_code).players.push({
-            socket_id: socket_id, 
-            nickname: nickname
-        });
-
-        // If the number of players exceed the max allowed, remove them, and return error
-        if (this.lobbies.get(lobby_code).players.length > this.lobbies.get(lobby_code).max_players) {
-            this.lobbies.get(lobby_code).players = this.lobbies.get(lobby_code).players.filter(obj => obj.socket_id != socket_id);
-            return this.retError(`Lobby "${lobby_code}" has reached the maximum number of players`);
-        };
-        
-        this.all_players.set(socket_id, lobby_code);
-        return this.retSuccess({players: this.lobbies.get(lobby_code).players});
+        else {
+            return this.retError(result.msg);
+        }
     }
 
 
@@ -169,24 +136,21 @@ class Lobbies {
      * Removes a player from the specified lobby
      * @param {string} lobby_code   Lobby to remove player from
      * @param {string} socket_id    ID of the player's socket connection
-     * @returns {returns}           List of players in the lobby (For convenience in updating player list)
+     * @returns {returns}           Lobby code and list of players in the lobby (For convenience in updating player list)
      */
-    removePlayer(lobby_code, socket_id) {
-        if (!this.exists(lobby_code)) 
-            return this.retError(`Cannot find lobby "${lobby_code}"`);
+    removePlayerDC(socket_id) {
 
-        const lobby = this.lobbies.get(lobby_code);
-        const prev_player_num = lobby.players.length;
+        if (!this.all_players.has(socket_id))
+            return this.retError();
 
-        // Reassigns player list to a new filtered list
-        lobby.players = lobby.players.filter(obj => obj.socket_id != socket_id);
-        
-        if (lobby.players.length < prev_player_num) {
-            this.all_players.delete(socket_id);
-            return this.retSuccess({players: this.lobbies.get(lobby_code).players});
-        }
-        else
-            return this.retError("Player cannot be found");
+        const player_info = this.all_players.get(socket_id);
+        const lobby = this.lobbies.get(player_info.lobby_code);
+
+        // Attempt player removal and return data if successful
+        const result = lobby.removePlayerDC(player_info.local_id);
+        return result.passed ?
+            this.retSuccess({lobby_code: player_info.lobby_code, players: lobby.getPlayers()}):
+            this.retError(result.msg);    
     }
 
 
@@ -195,32 +159,18 @@ class Lobbies {
      * @param {string} lobby_code Lobby which player exists in
      * @param {string} socket_id  ID of the player's socket connection
      * @param {string} nickname   New nickname to set for the player
-     * @returns {returns}         List of players in the lobby (For convenience in updating player list)
+     * @returns {returns}         Lobby code and list of players in the lobby (For convenience in updating player list)
      */
-     setPlayerName(lobby_code, socket_id, nickname) {
-        if (!this.exists(lobby_code))
-            return this.retError(`Cannot find lobby "${lobby_code}"`);
+     setPlayerName(socket_id, lobby_code, nickname) {
         
-        // Iterate through all players in lobby
+        // Get lobby of player with socket id
         const lobby = this.lobbies.get(lobby_code);
-        for (let i = 0; i < lobby.players.length; i += 1) {
-            if (lobby.players[i].socket_id == socket_id) {
 
-                // Check if old name is the same
-                if (lobby.players[i].nickname == nickname)
-                    return this.retError("Nickname requested is the same as current");
-                
-                // Comply with lobby policies (Duplicate names)
-                else if (!lobby.duplicate_names && this.hasName(lobby_code, nickname))
-                    return this.retError("This lobby does not allow duplicate names");
-
-                else {
-                    lobby.players[i].nickname = nickname;
-                    return this.retSuccess({players: lobby.players});
-                }
-            }
-        }
-        return this.retError(`Lobby ${lobby_code} | Player ${socket_id} doesn't exist`);
+        // Attempt player rename and return data if successful
+        const result = lobby.setPlayerName(socket_id, nickname);
+        return result.passed ?
+            this.retSuccess({players: lobby.getPlayers()}):
+            this.retError(result.msg); 
     }
 
 
@@ -246,13 +196,14 @@ class Lobbies {
      * @param {string} lobby_code  Lobby to check
      * @returns {returns}          data is true if lobby is not full and not started
      */
-    allowEntry(lobby_code) {
-        if (!this.exists(lobby_code))
-            return this.retError(`Cannot find lobby "${lobby_code}"`);
-        else if (this.isFull(lobby_code))
-            return this.retError(`Lobby "${lobby_code}" has reached the maximum number of players`);
-        else if (this.started(lobby_code))
-            return this.retError(`Lobby "${lobby_code}"'s game has started`);
+    allowEntry(code) {
+
+        if (!this.exists(code))
+            return this.retError(`Cannot find lobby "${code}"`);
+        else if (this.lobbies.get(code).getPlayerCount() >= this.lobbies.get(code).maxSize())
+            return this.retError(`Lobby "${code}" has reached the maximum number of players`);
+        else if (this.lobbies.get(code).started())
+            return this.retError(`Lobby "${code}"'s game has started`);
         else
             return this.retSuccess();
     }
@@ -263,61 +214,25 @@ class Lobbies {
 
     /**
      * @param {string} code Lobby to check for
-     * @returns {boolean}   true if this lobby has reached capacity
-     */
-    isFull(code) {
-        return (this.lobbies.get(code).players.length >= this.lobbies.get(code).max_players);
-    }
-
-
-    /**
-     * @param {string} code Lobby to check for
      * @returns {boolean}   true if a lobby with this code exists
      */
     exists(code) {
         return (this.lobbies.has(code));
     }
-    
-
-    /**
-     * @param {string} code Lobby to check for
-     * @returns {boolean}   true if this lobby's game has been set to started
-     */
-    started(code) {
-        return this.lobbies.get(code).game_started;
-    }
 
 
-    /**
-     * Checks if a lobby already has a player with the given name
-     * @param {string} code Lobby to check for
-     * @param {string} name Nickname to check for
-     * @returns {boolean}   true if a lobby already has a player with @name    
-     */
-    hasName(code, name) {
-        var exists = false;
-        this.lobbies.get(code).players.forEach(obj => {
-            if (obj.nickname == name)
-                exists = true;
-        });
-        return exists;
-    }
+    getPlayerLobbyInfo(socket_id) {
+        // Prepare player location info
+        if (!this.all_players.has(socket_id))
+            return this.retError(`Cannot find player`);
+        const info = this.all_players.get(socket_id);
+        
+        // Verify lobby exists
+        if (!this.exists(info.lobby_code)) 
+            return this.retError(`Cannot find lobby "${lobby_code}"`);
 
-    /**
-     * Returns the lobby a player is currently in
-     * @param {string} socket_id 
-     * @returns 
-     */
-    getLobbyOf(socket_id) {
-        if (this.all_players.has(socket_id))
-            return this.retSuccess({lobby_code: this.all_players.get(socket_id)});
-        else
-            return this.retError("Player doesn't exist");
-    }
-
-    // Return total number of players currently in a lobby
-    totalPlayers() {
-        return this.retSuccess({size: this.all_players.size});
+        // Returns the lobby code and a reference to it
+        return this.retSuccess({lobby_code: info.lobby_code, local_id: info.local_id});
     }
 
 
@@ -326,8 +241,7 @@ class Lobbies {
      * @param   {string} error_desc message describing what happened
      * @returns {returns}
      */
-    retError(error_desc) {
-        //console.log(error_desc);
+    retError(error_desc="") {
         return {passed: false, msg: error_desc, data: {}};
     }
 

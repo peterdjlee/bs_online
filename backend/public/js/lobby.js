@@ -31,11 +31,11 @@ xhr.onreadystatechange=function(){
             
             socket.on("UpdatePlayerList", (json) => {
                 var player_list = "";
-                (json.players).forEach(player => {
+                (json.player_names).forEach(player => {
                     player_list += `<li class="no-bullet-list">`;
                     if(player.socket_id == socket.id)
                         player_list += `> `
-                    player_list += `${player.nickname}</li>`
+                    player_list += `${player}</li>`
                 });
                 display_players.innerHTML = player_list;
             });

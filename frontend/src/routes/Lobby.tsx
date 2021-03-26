@@ -64,8 +64,8 @@ function Lobby(props: RouterProps) {
     if (player.nickname === '' || player.room === '') {
       props.history.push('/');
     } else {
-      socket.on('UpdatePlayerList', json =>
-        setPlayers(json.players.map(p => p.nickname)));
+      socket.on('UpdatePlayerList', json => 
+        setPlayers(json.player_names));
       socket.on('AddPlayerError', json => {
         setNotification(json.msg);
         props.history.goBack();

@@ -1,6 +1,6 @@
 const lobbies = require("../models/Lobbies");
 const str_generator = require("../utils/genRdmStr");
-const NUM_CASES = 1000;
+const NUM_CASES = 1; // 5000
 
 
 /**
@@ -31,61 +31,6 @@ test("create() / will not create duplicate lobbies", () => {
     expect(duplicates).toBe(false);
 });
 
-
-/**
- * _____________________________________________________________________________
- * getAll()
- */
-test("getAll() / can return info of all exisitng lobbies", () => {
-    
-    const lobby_codes = setUpLobbies(count=NUM_CASES, variation=true);
-    const lobby_infos = lobbies.getAll();
-    expect(lobby_infos.passed).toBe(true);
-
-    for (let i = 0; i < NUM_CASES; i += 1) {
-        const lobby_info = lobby_infos.data[lobby_codes[i]];
-
-        expect(lobby_info.max_players).toBe(i%10);
-        expect(lobby_info.duplicate_names).toBe(i%2);
-        expect(lobby_info.players).toStrictEqual([]);
-    };
-});
-
-
-test("getAll() / successfully runs when there are no active lobbies", () => {
-    lobbies.clearAll();
-
-    const lobby_infos = lobbies.getAll();
-    expect(lobby_infos.passed).toBe(true);
-    expect(lobby_infos.data).toStrictEqual({});
-});
-
-/**
- * ______________________________________________________________________________
- * get()
- */
-test("get() / returns the correct information", () => {
-    const lobby_codes = setUpLobbies(count=NUM_CASES, variation=true);
-
-    for (let i = 0; i < NUM_CASES; i += 1) {
-        const lobby_info = lobbies.get(lobby_codes[i]);
-
-        expect(lobby_info.passed).toBe(true);
-        expect(lobby_info.data.max_players).toBe(i%10);
-        expect(lobby_info.data.duplicate_names).toBe(i%2);
-        expect(lobby_info.data.players).toStrictEqual([]);
-        expect(lobby_info.data.game_started).toBe(false);
-    };
-});
-
-test("get() / recognizes lobby doesn't exist", () => {
-    lobbies.clearAll();
-
-    for (let i = 0; i < NUM_CASES; i += 1) {
-        const lobby_info = lobbies.get(str_generator.genCode());
-        properFail(lobby_info);
-    }
-});
 
 /**
  * _______________________________________________________________________________

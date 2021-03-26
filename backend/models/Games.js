@@ -22,7 +22,7 @@ class Games{
         });
 
         for(let i = 0; i < playerList.length; i++){
-            this.games_map.get(lobbyCode).playerPositions.set(playerList[i].socket_id, i);
+            this.games_map.get(lobbyCode).playerPositions.set(playerList[i], i);
         }
     }
 

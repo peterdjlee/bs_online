@@ -8,7 +8,7 @@ exports = module.exports = (io) => {
             const id = socket.id;
             const cardPos = info.cardPos;
             const pos = info.pos;
-            
+            /*
             if(pos == games.getCurrentTurn(code) && id == games.getPlayerList(code)[pos]){
                 games.updatePile(code, cards);
                 games.playCards(code, pos, cardPos);
@@ -19,6 +19,7 @@ exports = module.exports = (io) => {
                 io.to(id).emit("UpdatePlayerHand", games.getPlayerHand(code, player.socket_id));
                 io.to(code).emit("UpdateOtherHands", games.getHandNums(code));
             }
+            */
         })
 
         socket.on("RequestGameInfo", info => {
