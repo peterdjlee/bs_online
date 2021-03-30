@@ -27,8 +27,10 @@ function Game(props: RouterProps) {
   const [hand, setHand] = useState<string[]>([]);
 
   useEffect(() => {
-    socket.on('UpdatePlayerHand', cards => setHand(cards.map(getCardString)));
     socket.on('UpdateOtherHands', console.log);
+    socket.on('UpdatePlayerHand', cards => {
+      setHand(cards.sort((l, r) => l[0] - r[0]).map(getCardString));
+    });
     socket.on('StartTurn', console.log);
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
