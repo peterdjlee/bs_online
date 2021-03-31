@@ -48,7 +48,7 @@ exports = module.exports = (io) => {
             if (new_state) {
                 const result = lobbies.start(socket.id, lobby_code);
                 if (result.passed) {
-                    games.createGame(lobby_code, result.data.player_SIDs);
+                    games.createGame(lobby_code, result.data.player_SIDs, result.data.player_names);
                     socket.emit("StartGame" , {});
                     socket.broadcast.to(lobby_code).emit("StartGame", {});
                 }

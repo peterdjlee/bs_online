@@ -85,7 +85,7 @@ class Lobbies {
         // Attempt to start lobby and return data if successful
         const result = lobby.start(socket_id)
         return result.passed ? 
-            this.retSuccess({lobby_code: lobby_code, player_SIDs: lobby.getPlayerSIDs()}):
+            this.retSuccess({lobby_code: lobby_code, player_SIDs: lobby.getPlayerSIDs(), player_names: lobby.getPlayerNames()}):
             this.retError(result.msg);
     }
 
