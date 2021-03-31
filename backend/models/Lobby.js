@@ -38,6 +38,10 @@ class Lobby {
         return this.players_SID;
     }
 
+    getPlayerNames() {
+        return this.players_name;
+    }
+
     maxSize() {
         return this.max_players;
     }

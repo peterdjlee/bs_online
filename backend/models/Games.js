@@ -8,7 +8,7 @@ class Games{
 
     }
 
-    createGame(lobbyCode, playerList){
+    createGame(lobbyCode, playerList, playerNames){
 
         this.games_map.set(lobbyCode, 
         {
@@ -17,6 +17,7 @@ class Games{
             currentPlayerTurn: 0,
             currentCardRank: 1,
             playerList: playerList,
+            playerNames: playerNames,
             numOfLastCardsPlayed: 0,
             playerPositions: new Map()
         });
@@ -38,6 +39,7 @@ class Games{
 
         for(let i = 0; i < game.playerList.length; i++){
             HandSizes.push({
+                nickname: game.playerNames[i],
                 position: i,
                 count: game.playerHands[i].length
             });
