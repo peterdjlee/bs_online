@@ -26,7 +26,7 @@ function Game(props: RouterProps) {
   const socket = useContext(SocketContext);
   const player = useContext(PlayerContext);
   const [hand, setHand] = useState<string[]>([]);
-  const [table, setTable] = useState<object[]>([]);
+  const [table, setTable] = useState<any[]>([]);
   const [turn, setTurn] = useState({ cardRank: 0, position: 0 });
 
   useEffect(() => {
@@ -45,7 +45,9 @@ function Game(props: RouterProps) {
       flexDirection="column"
       alignItems="center"
       justifyContent="center">
-      <Table hands={table} turn={turn.position} />
+      <Table
+        hands={table.filter(hand => hand.nickname !== player.nickname)}
+        turn={turn.position} />
       <Box
         width={TABLE_WIDTH}
         height={TABLE_HEIGHT}

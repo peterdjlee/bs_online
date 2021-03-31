@@ -30,7 +30,7 @@ function OtherHand({ hand, total, turn }) {
       <Typography
         className={hand.position === turn ? classes.activePlayer : ""}
         align="center">
-        {hand.count}
+        {hand.nickname}: {hand.count}
       </Typography>
     </Box>
   );
