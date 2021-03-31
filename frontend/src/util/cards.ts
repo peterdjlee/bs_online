@@ -28,3 +28,19 @@ export function getCardString(card: number[]) {
 export function getCardArray(card: string) {
   return [rank.indexOf(card.substr(0, 1)) + 1, suit.indexOf(card.substr(1))];
 }
+
+export const rankString = [
+  'Ace',
+  'Two',
+  'Three',
+  'Four',
+  'Five',
+  'Six',
+  'Seven',
+  'Eight',
+  'Nine',
+  'Ten',
+  'Jack',
+  'Queen',
+  'King',
+];
