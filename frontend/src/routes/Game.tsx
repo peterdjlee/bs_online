@@ -25,12 +25,13 @@ function Game(props: RouterProps) {
   const socket = useContext(SocketContext);
   const player = useContext(PlayerContext);
   const [hand, setHand] = useState<string[]>([]);
+  const [table, setTable] = useState<object[]>([]);
 
   useEffect(() => {
-    socket.on('UpdateOtherHands', console.log);
     socket.on('UpdatePlayerHand', cards => {
       setHand(cards.sort((l, r) => l[0] - r[0]).map(getCardString));
     });
+    socket.on('UpdateOtherHands', hands => setTable(hands));
     socket.on('StartTurn', console.log);
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
@@ -42,7 +43,7 @@ function Game(props: RouterProps) {
       flexDirection="column"
       alignItems="center"
       justifyContent="center">
-      <Table></Table>
+      <Table hands={table} />
       <Typography variant="h4">{player.nickname}'s hand:</Typography>
       <Box width={1000}>
         <PlayerHand cards={hand} />
