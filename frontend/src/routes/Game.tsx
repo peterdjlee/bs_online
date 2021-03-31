@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core';
 import { Box, Button, Typography } from '@material-ui/core';
 import { RouterProps, withRouter } from 'react-router-dom';
 import PlayerHand from '../components/PlayerHand';
-import Table from '../components/Table';
+import Table, { WIDTH } from '../components/Table';
 import { PlayerContext } from '../util/player';
 import { SocketContext } from '../util/socket';
 import { getCardString } from '../util/cards';
@@ -45,7 +45,7 @@ function Game(props: RouterProps) {
       justifyContent="center">
       <Table hands={table} />
       <Typography variant="h4">{player.nickname}'s hand:</Typography>
-      <Box width={1000}>
+      <Box width={WIDTH}>
         <PlayerHand cards={hand} />
       </Box>
       <Button variant="contained" className={classes.button} color="primary">
