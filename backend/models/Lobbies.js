@@ -1,6 +1,10 @@
-const Lobby = require("../models/Lobby");
+/*
+    Lobbies.js
+    class file for controlling all lobbies and interfacing with sockets/api
+*/
 
-// Util for generating random strings
+
+const Lobby = require("../models/Lobby");
 const str_generator = require("../utils/genRdmStr");
 
 /**
@@ -52,12 +56,17 @@ class Lobbies {
      * @param {string} lobby_code   Code of lobby to retrieve from
      * @returns {returns}           returns an array of nicknames
      */
-    getPlayers(lobby_code) {
+    getPlayers(lobby_code, SID) {
         // Make sure lobby exists
         if (!this.exists(lobby_code))
             return this.retError(`Cannot find lobby "${lobby_code}"`);
 
         return this.retSuccess(this.lobbies.get(lobby_code).getPlayers());
+    }
+
+
+    started(lobby_code) {
+        return this.lobbies.get(lobby_code).started();
     }
 
 
@@ -98,6 +107,9 @@ class Lobbies {
     stop(socket_id, lobby_code) {
 
         const lobby = this.lobbies.get(lobby_code);
+
+        if (lobby == undefined)
+            return;
 
         // Attempt to stop lobby and return data if successful
         const result = lobby.stop(socket_id)

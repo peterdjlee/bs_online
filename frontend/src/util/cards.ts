@@ -21,8 +21,8 @@ export const suit = [
   's',
 ];
 
-export function getCardString(card: number[]) {
-  return rank[card[0]-1] + suit[card[1]];
+export function getCardString(card: number) {
+  return rank[(card % 52) % 13] + suit[Math.floor((card % 52) / 13)];
 }
 
 export function getCardArray(card: string) {

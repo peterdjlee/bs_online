@@ -15,7 +15,7 @@ exports = module.exports = (io) => {
             if (result.passed) {
                 // join player to socket room and emit information to players in the same room
                 socket.join(code);
-                socket.emit("UpdatePlayerList", result.data.players);
+                socket.emit("UpdatePlayerList", result.data.players, result.data.own_LID);
                 socket.broadcast.to(code).emit("UpdatePlayerList", result.data.players);
             }
             else {
@@ -72,8 +72,11 @@ exports = module.exports = (io) => {
 
             const result = lobbies.removePlayerDC(id);
             if (result.passed) {
-                if(result.data.players.length == 0)
+                if(result.data.players.length == 0) {
+                    if (lobbies.started(result.data.lobby_code))
+                        games.delete(result.data.lobby_code);
                     lobbies.delete(result.data.lobby_code);
+                }
                 else
                     socket.broadcast.to(result.data.lobby_code).emit("UpdatePlayerList", result.data.players);
             }

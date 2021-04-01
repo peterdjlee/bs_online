@@ -1,3 +1,5 @@
+const e = require("express");
+
 exports = module.exports = (io) => {
     const games = require("../models/Games");
 
@@ -6,20 +8,20 @@ exports = module.exports = (io) => {
         socket.on("PlayCard", info => {
             const code = info.lobby_code;
             const id = socket.id;
-            const cardPos = info.cardPos;
-            const pos = info.pos;
-            /*
-            if(pos == games.getCurrentTurn(code) && id == games.getPlayerList(code)[pos]){
-                games.updatePile(code, cards);
-                games.playCards(code, pos, cardPos);
-                games.nextTurn(code);
-                info.centralPileNum = games.getPile(code).length;
+            const cards = info.cards;
 
-                io.to(code).emit("PlayedCard", info);
-                io.to(id).emit("UpdatePlayerHand", games.getPlayerHand(code, player.socket_id));
-                io.to(code).emit("UpdateOtherHands", games.getHandNums(code));
+            const result = games.playCards(code, id, cards);
+            if (result.passed) {
+                socket.emit("UpdatePlayerHand", games.getPlayerHand(code, id));
+                //socket.emit("UpdateOtherHands", result.data);  probably not necessary to update
+                socket.broadcast.to(code).emit("UpdateOtherHands", result.data);
+                io.in(code).emit("UpdateCenterPile", {change: result.data.change * -1});
+                io.in(code).emit("UpdateTurnInfo", games.getCurrentTurn(code));
             }
-            */
+            
+            else {
+                socket.emit("PlayCardsError", {msg: result.msg});
+            }
         })
 
         socket.on("RequestGameInfo", info => {
@@ -27,7 +29,7 @@ exports = module.exports = (io) => {
 
             io.to(socket.id).emit("UpdatePlayerHand", games.getPlayerHand(code, socket.id));
             io.to(socket.id).emit("UpdateOtherHands", games.getAllHandSize(code));
-            io.to(socket.id).emit("StartTurn", {position: 0, cardRank: 1});
+            io.to(socket.id).emit("UpdateTurnInfo", games.getCurrentTurn(code));
         });
     });
 }
