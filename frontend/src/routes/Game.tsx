@@ -28,6 +28,7 @@ function Game(props: RouterProps) {
   const [hand, setHand] = useState<string[]>([]);
   const [table, setTable] = useState<any[]>([]);
   const [turn, setTurn] = useState({ exp_name: "", exp_rank: 0, pos: 0, turn: 0 });
+  const [pileCount, setPileCount] = useState(0);
 
   useEffect(() => {
     socket.on('UpdatePlayerHand', cards => {
@@ -35,6 +36,7 @@ function Game(props: RouterProps) {
     });
     socket.on('UpdateOtherHands', hands => setTable(hands));
     socket.on('UpdateTurnInfo', turn => setTurn(turn));
+    socket.on('UpdateCenterPile', e => setPileCount(pileCount + e.change));
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 
@@ -60,7 +62,7 @@ function Game(props: RouterProps) {
         <Typography variant="h4">{rankString[turn.exp_rank - 1]}</Typography>
         <Box textAlign="center" p={4}>
           <Card height={100} back />
-          <Typography>n cards</Typography>
+          <Typography>{pileCount} cards</Typography>
         </Box>
         <Button variant="contained" color="primary">Call BS</Button>
       </Box>
