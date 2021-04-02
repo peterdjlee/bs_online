@@ -16,7 +16,7 @@ function Table({ hands, turn }: { hands: object[], turn: number }) {
       width={WIDTH}
       height={HEIGHT}>
       {hands.map((hand, i) => (
-        <OtherHand hand={hand} total={hands.length+1} turn={turn} key={i} />
+        <OtherHand hand={hand} total={hands.length} turn={turn} key={i} />
       ))}
     </Box>
   );

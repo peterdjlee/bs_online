@@ -27,7 +27,7 @@ function Game(props: RouterProps) {
   const player = useContext(PlayerContext);
   const [hand, setHand] = useState<string[]>([]);
   const [table, setTable] = useState<any[]>([]);
-  const [turn, setTurn] = useState({ cardRank: 0, position: 0 });
+  const [turn, setTurn] = useState({ exp_name: "", exp_rank: 0, pos: 0, turn: 0 });
 
   useEffect(() => {
     socket.on('UpdatePlayerHand', cards => {
@@ -46,8 +46,8 @@ function Game(props: RouterProps) {
       alignItems="center"
       justifyContent="center">
       <Table
-        hands={table.filter(hand => hand.nickname !== player.nickname)}
-        turn={turn.position} />
+        hands={table}
+        turn={turn.pos} />
       <Box
         width={TABLE_WIDTH}
         height={TABLE_HEIGHT}
@@ -57,7 +57,7 @@ function Game(props: RouterProps) {
         alignItems="center"
         position="absolute"
         top={0}>
-        <Typography variant="h4">{rankString[turn.cardRank - 1]}</Typography>
+        <Typography variant="h4">{rankString[turn.exp_rank - 1]}</Typography>
         <Box textAlign="center" p={4}>
           <Card height={100} back />
           <Typography>n cards</Typography>
