@@ -7,7 +7,7 @@ import PlayerHand from '../components/PlayerHand';
 import Table, { WIDTH as TABLE_WIDTH, HEIGHT as TABLE_HEIGHT } from '../components/Table';
 import { PlayerContext } from '../util/player';
 import { SocketContext } from '../util/socket';
-import { getCardString, rankString } from '../util/cards';
+import { compareCards, getCardString, rankString } from '../util/cards';
 
 const useStyles = makeStyles({
   title: {
@@ -41,7 +41,7 @@ function Game(props: RouterProps) {
 
   useEffect(() => {
     socket.on('UpdatePlayerHand', cards => {
-      setHand(cards.sort((l, r) => l - r).map(getCardString));
+      setHand(cards.map(getCardString).sort(compareCards));
     });
     socket.on('UpdateOtherHands', hands => setTable(hands));
     socket.on('UpdateTurnInfo', turn => setTurn(turn));

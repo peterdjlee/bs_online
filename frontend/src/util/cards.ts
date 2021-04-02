@@ -21,6 +21,14 @@ export const suit = [
   's',
 ];
 
+export function compareCards(left: string, right: string) {
+  const rankL = rank.indexOf(left.substr(0,1));
+  const rankR = rank.indexOf(right.substr(0,1));
+  const suitL = suit.indexOf(left.substr(1));
+  const suitR = suit.indexOf(right.substr(1));
+  return (rankL*13+suitL) - (rankR*13+suitR);
+}
+
 export function getCardString(card: number) {
   return rank[(card % 52) % 13] + suit[Math.floor((card % 52) / 13)];
 }
