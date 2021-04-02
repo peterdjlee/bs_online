@@ -33,8 +33,8 @@ export function getCardString(card: number) {
   return rank[(card % 52) % 13] + suit[Math.floor((card % 52) / 13)];
 }
 
-export function getCardArray(card: string) {
-  return [rank.indexOf(card.substr(0, 1)) + 1, suit.indexOf(card.substr(1))];
+export function getCardID(card: string) {
+  return rank.indexOf(card.substr(0, 1)) + suit.indexOf(card.substr(1))*13;
 }
 
 export const rankString = [

@@ -87,7 +87,7 @@ class BS {
         const pos = this.SID_to_position.get(SID);
 
         // Security Check (Make sure player is allowed to play card)
-        if (!this.cur_turn_pos === pos)
+        if (this.cur_turn_pos !== pos)
             return this.retError("Cards played during another player's turn");
 
         // Security check (Make sure player has cards)
@@ -121,7 +121,7 @@ class BS {
 
     nextTurn() {
         this.turn_count += 1;
-        this.cur_turn_player = this.p_queue.next();
+        this.cur_turn_pos = this.p_queue.next();
         this.cur_turn_exp_rank = (this.cur_turn_exp_rank + 1) % 13;
     }
     

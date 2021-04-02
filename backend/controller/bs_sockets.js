@@ -14,7 +14,7 @@ exports = module.exports = (io) => {
             if (result.passed) {
                 socket.emit("UpdatePlayerHand", games.getPlayerHand(code, id));
                 //socket.emit("UpdateOtherHands", result.data);  probably not necessary to update
-                socket.broadcast.to(code).emit("UpdateOtherHands", result.data);
+                socket.broadcast.to(code).emit("UpdateOtherHands", games.getAllHandSize(code));
                 io.in(code).emit("UpdateCenterPile", {change: result.data.change * -1});
                 io.in(code).emit("UpdateTurnInfo", games.getCurrentTurn(code));
             }

@@ -7,7 +7,8 @@ import PlayerHand from '../components/PlayerHand';
 import Table, { WIDTH as TABLE_WIDTH, HEIGHT as TABLE_HEIGHT } from '../components/Table';
 import { PlayerContext } from '../util/player';
 import { SocketContext } from '../util/socket';
-import { compareCards, getCardString, rankString } from '../util/cards';
+import { compareCards, getCardID, getCardString, rankString } from '../util/cards';
+import { NotificationContext } from '../util/notification';
 
 const useStyles = makeStyles({
   title: {
@@ -25,6 +26,7 @@ function Game(props: RouterProps) {
   const classes = useStyles();
   const socket = useContext(SocketContext);
   const player = useContext(PlayerContext);
+  const setNotification = useContext(NotificationContext);
   const [hand, setHand] = useState<string[]>([]);
   const [table, setTable] = useState<any[]>([]);
   const [turn, setTurn] = useState({ exp_name: "", exp_rank: 0, pos: 0, turn: 0 });
@@ -39,6 +41,14 @@ function Game(props: RouterProps) {
     }
   };
 
+  const playTurn = () => {
+    socket.emit('PlayCard', {
+      lobby_code: player.room,
+      cards: selectedCards.map(getCardID)
+      });
+    setSelectedCards([]);
+  }
+
   useEffect(() => {
     socket.on('UpdatePlayerHand', cards => {
       setHand(cards.map(getCardString).sort(compareCards));
@@ -46,6 +56,7 @@ function Game(props: RouterProps) {
     socket.on('UpdateOtherHands', hands => setTable(hands));
     socket.on('UpdateTurnInfo', turn => setTurn(turn));
     socket.on('UpdateCenterPile', e => setPileCount(pileCount + e.change));
+    socket.on('PlayCardsError', e => setNotification(e.msg));
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 
@@ -73,7 +84,11 @@ function Game(props: RouterProps) {
           <Card height={100} back />
           <Typography>{pileCount} cards</Typography>
         </Box>
-        <Button variant="contained" color="primary">Call BS</Button>
+        <Button
+          variant="contained"
+          color="primary">
+          Call BS
+        </Button>
       </Box>
       <Typography variant="h4">{player.nickname}'s hand:</Typography>
       <Box width={TABLE_WIDTH}>
@@ -83,7 +98,11 @@ function Game(props: RouterProps) {
           cardClicked={toggleCard}
         />
       </Box>
-      <Button variant="contained" className={classes.button} color="primary">
+      <Button
+        onClick={playTurn}
+        variant="contained"
+        className={classes.button}
+        color="primary">
         Submit
       </Button>
     </Box>
