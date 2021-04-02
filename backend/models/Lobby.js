@@ -1,6 +1,7 @@
 /*
     Lobby.js
-    class object for storing and modifying lobby objects
+
+    Class object for simulating a lobby that players can join/leave
 */
 
 class Lobby {

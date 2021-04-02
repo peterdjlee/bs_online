@@ -1,6 +1,8 @@
 /*
     Lobbies.js
-    class file for controlling all lobbies and interfacing with sockets/api
+    
+    stores data using model exported from Lobby.js.
+    manages all lobby instances and calls corresponding functions from Lobby models
 */
 
 
@@ -230,21 +232,6 @@ class Lobbies {
      */
     exists(code) {
         return (this.lobbies.has(code));
-    }
-
-
-    getPlayerLobbyInfo(socket_id) {
-        // Prepare player location info
-        if (!this.all_players.has(socket_id))
-            return this.retError(`Cannot find player`);
-        const info = this.all_players.get(socket_id);
-        
-        // Verify lobby exists
-        if (!this.exists(info.lobby_code)) 
-            return this.retError(`Cannot find lobby "${lobby_code}"`);
-
-        // Returns the lobby code and a reference to it
-        return this.retSuccess({lobby_code: info.lobby_code, local_id: info.local_id});
     }
 
 

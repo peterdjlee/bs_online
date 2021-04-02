@@ -1,3 +1,10 @@
+/*
+    Games.js
+
+    Stores all game data using model exported from BS.js
+    Manages all BS games and calls corresponding functions from model
+*/
+
 const cards_generator = require("../utils/genCards");
 const BS = require("./BS");
 
@@ -7,47 +14,58 @@ class Games{
         this.games_map = new Map();
     }
 
-    createGame(lobbyCode, playerList, playerNames, numDecks=1){
-        this.games_map.set(lobbyCode, new BS(lobbyCode, playerList, playerNames, numDecks));
-    }
+    // - Intermediate functions that locate a specific lobby and call corresponding functions -
 
-    getPlayerHand(gameCode, socket_id){
-        const game = this.games_map.get(gameCode);
-        return game.getPlayerHand(socket_id);
-    }
-
-    getAllHandSize(gameCode){
-        const game = this.games_map.get(gameCode);
-        return game.getAllHandSize();
-    }
-
-    getHandSize(gameCode, socket_id){
-        const game = this.games_map.get(gameCode);
-        return game.getHandSize(socket_id)
-    }
-
-    cPileCollect(gameCode){
-        const game = this.games_map.get(gameCode);
-        return game.cPileCollect();
-    }
-
-    getCurrentTurn(gameCode){
-        return this.games_map.get(gameCode).getTurn();
-    }
-
-    nextTurn(gameCode) {
-        this.games_map.get(gameCode).nextTurn();
-    }
-
-    playCards(gameCode, SID, cards){
-        return this.games_map.get(gameCode).playCards(SID, cards);
+    createGame(code, playerList, playerNames, numDecks=1){
+        this.games_map.set(code, new BS(code, playerList, playerNames, numDecks));
     }
 
 
-    removePlayer(gameCode, SID){
-        this.games_map.get(gameCode).removePlayer(SID);
+    getPlayerHand(code, socket_id){
+        return this.games_map.get(code).getPlayerHand(socket_id);
     }
 
+
+    getAllHandSize(code){
+        return this.games_map.get(code).getAllHandSize();
+    }
+
+
+    getHandSize(code, socket_id){
+        return this.games_map.get(code).getHandSize(socket_id)
+    }
+
+    
+    cPileSize(code) {
+        return this.games_map.get(code).cPileSize();
+    }
+
+
+    cPileCollect(code){
+        return this.games_map.get(code).cPileCollect();
+    }
+
+
+    getCurrentTurn(code){
+        return this.games_map.get(code).getTurn();
+    }
+
+
+    nextTurn(code) {
+        this.games_map.get(code).nextTurn();
+    }
+
+
+    playCards(code, SID, cards){
+        return this.games_map.get(code).playCards(SID, cards);
+    }
+
+    
+    removePlayer(code, SID){
+        this.games_map.get(code).removePlayer(SID);
+    }
+
+    // --------------------------------------------------------
 
     /**
      * Deletes the specified game

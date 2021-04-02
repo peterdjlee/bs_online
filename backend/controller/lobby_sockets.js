@@ -5,6 +5,9 @@ exports = module.exports = (io) => {
     
     io.on("connection", socket => {
 
+        /**
+         * @param {lobby_code: string, nickname: string}
+         */
         socket.on("AddPlayer", info => {
             const code = info.lobby_code;
             const id = socket.id;
@@ -24,8 +27,11 @@ exports = module.exports = (io) => {
         });
 
 
+        /**
+         * @param {lobby_code: {string}, nickname: {string}}
+         */
         socket.on("ChangePlayerName", info => {
-            const id = socket.id;
+            const id = socket.id; // Player's id retrieved from socket connection => harder to tamper
             const code = info.lobby_code;
             const nickname = info.nickname;
 
@@ -40,6 +46,10 @@ exports = module.exports = (io) => {
         });
 
 
+        /**
+         * If lobby state is true => game started
+         * @param {lobby_code: string, started: boolean}
+         */
         socket.on("SetLobbyState", info => {
             const new_state = info.started;
             const lobby_code = info.lobby_code;
@@ -67,12 +77,15 @@ exports = module.exports = (io) => {
         });
 
 
+        /**
+         * Default socket.io disconnect listener
+         */
         socket.on("disconnect", () => {
             const id = socket.id;
 
             const result = lobbies.removePlayerDC(id);
-            if (result.passed) {
-                if(result.data.players.length == 0) {
+            if (result.passed) {  
+                if(result.data.players.player_names.length == 0) {
                     if (lobbies.started(result.data.lobby_code))
                         games.delete(result.data.lobby_code);
                     lobbies.delete(result.data.lobby_code);

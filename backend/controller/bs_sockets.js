@@ -1,10 +1,11 @@
-const e = require("express");
-
 exports = module.exports = (io) => {
     const games = require("../models/Games");
 
     io.on("connection", socket => {
 
+        /**
+         * @param {"lobby_code": string, "cards": array[int]}
+         */
         socket.on("PlayCard", info => {
             const code = info.lobby_code;
             const id = socket.id;
@@ -13,9 +14,8 @@ exports = module.exports = (io) => {
             const result = games.playCards(code, id, cards);
             if (result.passed) {
                 socket.emit("UpdatePlayerHand", games.getPlayerHand(code, id));
-                //socket.emit("UpdateOtherHands", result.data);  probably not necessary to update
-                socket.broadcast.to(code).emit("UpdateOtherHands", games.getAllHandSize(code));
-                io.in(code).emit("UpdateCenterPile", {change: result.data.change * -1});
+                io.in(code).emit("UpdateOtherHands", games.getAllHandSize(code));
+                io.in(code).emit("UpdateCenterPile", {change: games.cPileSize(code)});
                 io.in(code).emit("UpdateTurnInfo", games.getCurrentTurn(code));
             }
             
@@ -24,6 +24,10 @@ exports = module.exports = (io) => {
             }
         })
 
+        /**
+         * Player requests refresh of card and turn info (Either to start game or refresh current info)
+         * @param {"lobby_code": string}
+         */
         socket.on("RequestGameInfo", info => {
             const code = info.lobby_code;
 
