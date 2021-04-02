@@ -29,6 +29,15 @@ function Game(props: RouterProps) {
   const [table, setTable] = useState<any[]>([]);
   const [turn, setTurn] = useState({ exp_name: "", exp_rank: 0, pos: 0, turn: 0 });
   const [pileCount, setPileCount] = useState(0);
+  const [selectedCards, setSelectedCards] = useState<string[]>([]);
+
+  const toggleCard = card => {
+    if (selectedCards.includes(card)) {
+      setSelectedCards(selectedCards.filter(card2 => card !== card2));
+    } else {
+      setSelectedCards([...selectedCards, card]);
+    }
+  };
 
   useEffect(() => {
     socket.on('UpdatePlayerHand', cards => {
@@ -68,7 +77,11 @@ function Game(props: RouterProps) {
       </Box>
       <Typography variant="h4">{player.nickname}'s hand:</Typography>
       <Box width={TABLE_WIDTH}>
-        <PlayerHand cards={hand} />
+        <PlayerHand
+          cards={hand}
+          selectedCards={selectedCards}
+          cardClicked={toggleCard}
+        />
       </Box>
       <Button variant="contained" className={classes.button} color="primary">
         Submit
