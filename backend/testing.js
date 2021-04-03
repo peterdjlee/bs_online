@@ -5,6 +5,7 @@ const CPile = require("./utils/gameCPile");
 const PQueue = require("./utils/gamePQueue");
 const {newShuffledDeck, shuffleAndDeal, getCardStats} = require("./utils/genCards");
 const BS = require("./models/BS")
+const WQueue = require("./utils/gameWQueue");
 
 // --- Testing data ---
 const test_player_names = ["A", "B", "C", "D", "E", "F", "G"]
@@ -51,8 +52,26 @@ for (let i = 26; i < 52; i+=1) test_rm_deck.push(i);
 
 const test_BS = new BS("AAAA", test_player_SIDs, test_player_names, 1);
 
+const test_W_queue = new WQueue();
+
+console.log(test_W_queue.pop());
+test_W_queue.push(4);
+console.log(test_W_queue.pop());
+test_W_queue.push(5);
+test_W_queue.push(6);
+test_W_queue.push(7);
+test_W_queue.push(8);
+console.log(test_W_queue.get());
+test_W_queue.remove(6);
+test_W_queue.remove(7);
+test_W_queue.remove(6);
+console.log(test_W_queue.get());
+
+
 // --------------------
 var start = window.performance.now();
+
+
 
 
 for (let i = 0; i < 1; i += 1) {
