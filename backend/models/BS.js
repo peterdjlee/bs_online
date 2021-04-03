@@ -137,11 +137,6 @@ class BS {
                 return this.retError("A card not owned by the player is played (1r2q)");
         }
 
-
-        if (this.turn_count % 3 == 0) {
-            this.callBS(SID);
-        }
-
         // Update game vars to prevent unwanted behavior
         this.operation_num += 1;
 
