@@ -28,6 +28,7 @@ class Lobby {
         this.players_LID = [];
         this.players_SID = [];      
         this.players_active = [];
+        this.player_tags = [];
     }
 
 
@@ -44,7 +45,7 @@ class Lobby {
     };
 
 
-    started() {
+    isStarted() {
         return this.game_started;
     };
 

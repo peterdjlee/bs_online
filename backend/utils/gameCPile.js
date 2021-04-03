@@ -20,8 +20,8 @@ class CPile {
      * @param {int} pos             position of the player in the game
      * @param {array[int]} cards    the value of cards to be added to center
      */
-    push(pos, cards) {
-        this.card_stack.push({pos: pos, cards: cards});
+    push(pos, cards, exp_rank) {
+        this.card_stack.push({pos: pos, cards: cards, exp_rank: exp_rank});
         this.count += cards.length;
     }
 
@@ -31,13 +31,14 @@ class CPile {
      * @returns {array[int]}        value of all cards in the stack
      */
     popAll() {
-        const all_cards = []
+        const all_cards = [];
         this.card_stack.forEach(group => 
             group.cards.forEach( val =>
                 all_cards.push(val)
             )    
         );
         this.card_stack.length = 0;
+        this.count = 0;
         return all_cards;
     }
 

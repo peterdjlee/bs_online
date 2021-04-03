@@ -15,6 +15,7 @@ exports = module.exports = (io) => {
             if (result.passed) {
                 socket.emit("UpdatePlayerHand", games.getPlayerHand(code, id));
                 io.in(code).emit("UpdateOtherHands", games.getAllHandSize(code));
+                //io.in(code).emit("UpdateOpNum", games.getOpNum(code));
                 io.in(code).emit("UpdateCenterPile", {change: games.cPileSize(code)});
                 io.in(code).emit("UpdateTurnInfo", games.getCurrentTurn(code));
             }
@@ -34,6 +35,29 @@ exports = module.exports = (io) => {
             io.to(socket.id).emit("UpdatePlayerHand", games.getPlayerHand(code, socket.id));
             io.to(socket.id).emit("UpdateOtherHands", games.getAllHandSize(code));
             io.to(socket.id).emit("UpdateTurnInfo", games.getCurrentTurn(code));
+        });
+
+
+        socket.on("CallBS", info => {
+            const code = info.lobby_code;
+
+            const result = games.callBS(code, socket.id);
+            console.log({result: result.data});
+            if (result.passed) {
+                io.in(code).emit("BSResult", {
+                    was_bs: result.data.was_bs,
+                    caller_pos: result.data.caller_pos, 
+                    caller_name: result.data.caller_name,
+                    callee_pos: result.data.callee_pos,
+                    callee_name: result.data.callee_name
+                });
+                result.data.modified_hands.forEach(sid => {
+                    io.to(sid).emit("UpdatePlayerHand", games.getPlayerHand(code, sid));
+                });
+                io.in(code).emit("UpdateOtherHands", games.getAllHandSize(code));
+                //io.in(code).emit("UpdateOpNum", games.getOpNum(code));
+                io.in(code).emit("UpdateCenterPile", {change: games.cPileSize(code)});
+            }
         });
     });
 }

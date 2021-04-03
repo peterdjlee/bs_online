@@ -67,8 +67,8 @@ class Lobbies {
     }
 
 
-    started(lobby_code) {
-        return this.lobbies.get(lobby_code).started();
+    isStarted(lobby_code) {
+        return this.lobbies.get(lobby_code).isStarted();
     }
 
 
@@ -216,7 +216,7 @@ class Lobbies {
             return this.retError(`Cannot find lobby "${code}"`);
         else if (this.lobbies.get(code).getPlayerCount() >= this.lobbies.get(code).maxSize())
             return this.retError(`Lobby "${code}" has reached the maximum number of players`);
-        else if (this.lobbies.get(code).started())
+        else if (this.lobbies.get(code).isStarted())
             return this.retError(`Lobby "${code}"'s game has started`);
         else
             return this.retSuccess();

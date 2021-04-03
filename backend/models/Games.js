@@ -31,8 +31,8 @@ class Games{
     }
 
 
-    getHandSize(code, socket_id){
-        return this.games_map.get(code).getHandSize(socket_id)
+    getHandSize(code, arr_sid){
+        return this.games_map.get(code).getHandSize(arr_sid);
     }
 
     
@@ -64,6 +64,16 @@ class Games{
     removePlayer(code, SID){
         this.games_map.get(code).removePlayer(SID);
     }
+
+
+    callBS(code, SID) {
+        return this.games_map.get(code).callBS(SID);
+    }
+
+    getOpNum(code) {
+        return this.games_map.get(code).getOpNum();
+    }
+
 
     // --------------------------------------------------------
 

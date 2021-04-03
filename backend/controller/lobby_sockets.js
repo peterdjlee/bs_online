@@ -84,14 +84,20 @@ exports = module.exports = (io) => {
             const id = socket.id;
 
             const result = lobbies.removePlayerDC(id);
-            if (result.passed) {  
+            if (result.passed) {
+                const has_game = lobbies.isStarted(result.data.lobby_code);
                 if(result.data.players.player_names.length == 0) {
-                    if (lobbies.started(result.data.lobby_code))
+                    if (has_game)
                         games.delete(result.data.lobby_code);
                     lobbies.delete(result.data.lobby_code);
                 }
-                else
+                else {
+                    if (has_game) {
+                        games.removePlayer(result.data.lobby_code, id);
+                        io.in(result.data.lobby_code).emit("UpdateTurnInfo", games.getCurrentTurn(result.data.lobby_code));
+                    }
                     socket.broadcast.to(result.data.lobby_code).emit("UpdatePlayerList", result.data.players);
+                }
             }
         });
 

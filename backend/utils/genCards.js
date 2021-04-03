@@ -57,5 +57,12 @@ function getCardStats(id) {
     }
 }
 
+function getCardSuit(id) {
+    return Math.floor((id % 52) / 13);
+}
 
-module.exports = {newShuffledDeck, shuffleAndDeal, getCardStats};
+function getCardRank(id) {
+    return (id % 52) % 13;
+}
+
+module.exports = {newShuffledDeck, shuffleAndDeal, getCardStats, getCardSuit, getCardRank};
