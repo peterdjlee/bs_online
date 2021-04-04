@@ -49,6 +49,13 @@ function Game(props: RouterProps) {
     setSelectedCards([]);
   }
 
+  const callBS = () => {
+    socket.emit('CallBS', {
+      lobby_code: player.room
+      });
+    setSelectedCards([]);
+  }
+
   useEffect(() => {
     socket.on('UpdatePlayerHand', cards => {
       setHand(cards.map(getCardString).sort(compareCards));
@@ -57,6 +64,7 @@ function Game(props: RouterProps) {
     socket.on('UpdateTurnInfo', turn => setTurn(turn));
     socket.on('UpdateCenterPile', e => setPileCount(pileCount + e.change));
     socket.on('PlayCardsError', e => setNotification(e.msg));
+    socket.on('BSResult', result => setNotification(result.msg));
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 
@@ -79,12 +87,13 @@ function Game(props: RouterProps) {
         alignItems="center"
         position="absolute"
         top={0}>
-        <Typography variant="h4">{rankString[turn.exp_rank - 1]}</Typography>
+        <Typography variant="h4">{rankString[turn.exp_rank]}</Typography>
         <Box textAlign="center" p={4}>
           <Card height={100} back />
           <Typography>{pileCount} cards</Typography>
         </Box>
         <Button
+          onClick={callBS}
           variant="contained"
           color="primary">
           Call BS
