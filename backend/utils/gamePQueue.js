@@ -67,6 +67,15 @@ class PQueue {
         // node not found
         return false
     }
+
+
+    getCount() {
+        return this.count;
+    }
+
+    getCurrent() {
+        return this.cur_node.getPos();
+    }
 };
 
 

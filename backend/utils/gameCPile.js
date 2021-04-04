@@ -10,7 +10,7 @@
 class CPile {
     
     constructor() {
-        this.card_stack = [];
+        this.card_stack = [{pos: -1, cards: [], exp_rank: -1}];
         this.count = 0;
     }
 

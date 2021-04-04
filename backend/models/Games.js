@@ -30,11 +30,6 @@ class Games{
         return this.games_map.get(code).getAllHandSize();
     }
 
-
-    getHandSize(code, arr_sid){
-        return this.games_map.get(code).getHandSize(arr_sid);
-    }
-
     
     cPileSize(code) {
         return this.games_map.get(code).cPileSize();
@@ -56,8 +51,8 @@ class Games{
     }
 
 
-    playCards(code, SID, cards){
-        return this.games_map.get(code).playCards(SID, cards);
+    playCards(code, SID, cards, op_num){
+        return this.games_map.get(code).playCards(SID, cards, op_num);
     }
 
     
@@ -66,8 +61,8 @@ class Games{
     }
 
 
-    callBS(code, SID) {
-        return this.games_map.get(code).callBS(SID);
+    callBS(code, SID, op_num) {
+        return this.games_map.get(code).callBS(SID, op_num);
     }
 
     getOpNum(code) {
