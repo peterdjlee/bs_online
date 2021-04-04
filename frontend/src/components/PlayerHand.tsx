@@ -6,9 +6,12 @@ const useStyles = makeStyles({
   hand: {
     height: 185,
     display: 'flex',
-    'overflow-x': 'scroll',
+    overflowX: 'scroll',
     alignItems: 'center',
   },
+  card: {
+    marginRight: 5
+  }
 });
 
 function PlayerHand({ cards, selectedCards, cardClicked }) {
@@ -16,7 +19,7 @@ function PlayerHand({ cards, selectedCards, cardClicked }) {
   return (
     <Box className={classes.hand}>
       {cards.map((card, i) => (
-        <div key={i} onClick={() => cardClicked(card)}>
+        <div className={classes.card} key={i} onClick={() => cardClicked(card)}>
           <Card
             card={card}
             height={selectedCards.includes(card) ? 160 : 140}
