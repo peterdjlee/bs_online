@@ -9,6 +9,7 @@ import { PlayerContext } from '../util/player';
 import { SocketContext } from '../util/socket';
 import { compareCards, getCardID, getCardString, rankString } from '../util/cards';
 import { NotificationContext } from '../util/notification';
+import GameOver from '../components/GameOver';
 
 const useStyles = makeStyles({
   title: {
@@ -32,6 +33,7 @@ function Game(props: RouterProps) {
   const [turn, setTurn] = useState({ exp_name: "", exp_rank: 0, pos: 0, turn: 0 });
   const [pileCount, setPileCount] = useState(0);
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
+  const [winner, setWinner] = useState<string>();
 
   const toggleCard = card => {
     if (selectedCards.includes(card)) {
@@ -69,6 +71,7 @@ function Game(props: RouterProps) {
       ${result.caller_name}
       ${result.was_bs ? 'correctly' : 'incorrectly'}
       called BS on ${result.callee_name}`));
+    socket.on('GameOver', result => setWinner(result[0].nickname));
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 
@@ -118,6 +121,7 @@ function Game(props: RouterProps) {
         color="primary">
         Submit
       </Button>
+      <GameOver winner={winner} />
     </Box>
   )
 }
