@@ -11,6 +11,7 @@ function NotificationWrapper({ children }) {
       <Snackbar
         anchorOrigin={{vertical: "top", horizontal: "center"}}
         open={notification !== ""}
+        autoHideDuration={3000}
         onClose={() => setNotification("")}
         message={notification} />
     </NotificationContext.Provider>

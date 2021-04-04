@@ -45,14 +45,14 @@ function Game(props: RouterProps) {
     socket.emit('PlayCard', {
       lobby_code: player.room,
       cards: selectedCards.map(getCardID)
-      });
+    });
     setSelectedCards([]);
   }
 
   const callBS = () => {
     socket.emit('CallBS', {
       lobby_code: player.room
-      });
+    });
     setSelectedCards([]);
   }
 
@@ -64,7 +64,11 @@ function Game(props: RouterProps) {
     socket.on('UpdateTurnInfo', turn => setTurn(turn));
     socket.on('UpdateCenterPile', e => setPileCount(pileCount + e.change));
     socket.on('PlayCardsError', e => setNotification(e.msg));
-    socket.on('BSResult', result => setNotification(result.msg));
+    socket.on('BSResult', result =>
+      setNotification(`
+      ${result.caller_name}
+      ${result.was_bs ? 'correctly' : 'incorrectly'}
+      called BS on ${result.callee_name}`));
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 
