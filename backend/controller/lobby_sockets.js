@@ -5,6 +5,9 @@ exports = module.exports = (io) => {
     
     io.on("connection", socket => {
 
+        /**
+         * @param {lobby_code: string, nickname: string}
+         */
         socket.on("AddPlayer", info => {
             const code = info.lobby_code;
             const id = socket.id;
@@ -15,7 +18,7 @@ exports = module.exports = (io) => {
             if (result.passed) {
                 // join player to socket room and emit information to players in the same room
                 socket.join(code);
-                socket.emit("UpdatePlayerList", result.data.players);
+                socket.emit("UpdatePlayerList", result.data.players, result.data.own_LID);
                 socket.broadcast.to(code).emit("UpdatePlayerList", result.data.players);
             }
             else {
@@ -24,8 +27,11 @@ exports = module.exports = (io) => {
         });
 
 
+        /**
+         * @param {lobby_code: {string}, nickname: {string}}
+         */
         socket.on("ChangePlayerName", info => {
-            const id = socket.id;
+            const id = socket.id; // Player's id retrieved from socket connection => harder to tamper
             const code = info.lobby_code;
             const nickname = info.nickname;
 
@@ -40,6 +46,10 @@ exports = module.exports = (io) => {
         });
 
 
+        /**
+         * If lobby state is true => game started
+         * @param {lobby_code: string, started: boolean}
+         */
         socket.on("SetLobbyState", info => {
             const new_state = info.started;
             const lobby_code = info.lobby_code;
@@ -67,15 +77,27 @@ exports = module.exports = (io) => {
         });
 
 
+        /**
+         * Default socket.io disconnect listener
+         */
         socket.on("disconnect", () => {
             const id = socket.id;
 
             const result = lobbies.removePlayerDC(id);
             if (result.passed) {
-                if(result.data.players.length == 0)
+                const has_game = lobbies.isStarted(result.data.lobby_code);
+                if(result.data.players.player_names.length == 0) {
+                    if (has_game)
+                        games.delete(result.data.lobby_code);
                     lobbies.delete(result.data.lobby_code);
-                else
+                }
+                else {
+                    if (has_game) {
+                        games.removePlayer(result.data.lobby_code, id);
+                        io.in(result.data.lobby_code).emit("UpdateTurnInfo", games.getCurrentTurn(result.data.lobby_code));
+                    }
                     socket.broadcast.to(result.data.lobby_code).emit("UpdatePlayerList", result.data.players);
+                }
             }
         });
 

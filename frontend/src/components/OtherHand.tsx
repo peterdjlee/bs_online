@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Card from '@heruka_urgyen/react-playing-cards/lib/TcN';
 import { Box, makeStyles, Typography } from '@material-ui/core';
 import { WIDTH, HEIGHT } from './Table';
+import { PlayerContext } from '../util/player';
 
 const useStyles = makeStyles({
   activePlayer: {
@@ -23,6 +24,7 @@ function getPosition(pos: number, total: number) {
 
 function OtherHand({ hand, total, turn }) {
   const classes = useStyles();
+  const player = useContext(PlayerContext);
   const pos = getPosition(hand.position, total);
   return (
     <Box position="absolute" {...pos}>
@@ -30,7 +32,7 @@ function OtherHand({ hand, total, turn }) {
       <Typography
         className={hand.position === turn ? classes.activePlayer : ""}
         align="center">
-        {hand.nickname}: {hand.count}
+        {hand.nickname === player.nickname ? "you" : hand.nickname}: {hand.count}
       </Typography>
     </Box>
   );

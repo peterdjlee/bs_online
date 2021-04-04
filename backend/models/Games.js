@@ -1,96 +1,85 @@
+/*
+    Games.js
+
+    Stores all game data using model exported from BS.js
+    Manages all BS games and calls corresponding functions from model
+*/
+
 const cards_generator = require("../utils/genCards");
+const BS = require("./BS");
 
 class Games{
 
-    constructor(){
+    constructor() {
         this.games_map = new Map();
-
-
     }
 
-    createGame(lobbyCode, playerList, playerNames){
+    // - Intermediate functions that locate a specific lobby and call corresponding functions -
 
-        this.games_map.set(lobbyCode, 
-        {
-            centralPile: [],
-            playerHands: cards_generator.shuffleAndDeal(playerList.length),
-            currentPlayerTurn: 0,
-            currentCardRank: 1,
-            playerList: playerList,
-            playerNames: playerNames,
-            numOfLastCardsPlayed: 0,
-            playerPositions: new Map()
-        });
-
-        for(let i = 0; i < playerList.length; i++){
-            this.games_map.get(lobbyCode).playerPositions.set(playerList[i], i);
-        }
+    createGame(code, playerList, playerNames, numDecks=1){
+        this.games_map.set(code, new BS(code, playerList, playerNames, numDecks));
     }
 
 
-    getPlayerHand(gameCode, socket_id){
-        const game = this.games_map.get(gameCode)
-        return game.playerHands[game.playerPositions.get(socket_id)];
-    }
-
-    getAllHandSize(gameCode){
-        var HandSizes = []
-        const game = this.games_map.get(gameCode);
-
-        for(let i = 0; i < game.playerList.length; i++){
-            HandSizes.push({
-                nickname: game.playerNames[i],
-                position: i,
-                count: game.playerHands[i].length
-            });
-        }
-
-        return HandSizes;
-    }
-
-    getHandSize(gameCode, pos){
-        return {position: pos, 
-                count: this.games_map.get(gameCode).playerHands[pos].length
-        };
-    }
-
-    getPlayerList(gameCode){
-        return this.games_map.get(gameCode).playerList
-    }
-
-    getPile(gameCode){
-        return this.games_map.get(gameCode).centralPile;
-    }
-
-    getCurrentTurn(gameCode){
-        return this.games_map.get(gameCode).currentPlayerTurn;
+    getPlayerHand(code, socket_id){
+        return this.games_map.get(code).getPlayerHand(socket_id);
     }
 
 
-    updatePile(gameCode, cards){
-        for (card in cards){
-            this.games_map.get(gameCode).centralPile.push(card);
-        }
-        
+    getAllHandSize(code){
+        return this.games_map.get(code).getAllHandSize();
     }
 
-    playCards(gameCode, pos, cardPos){
-        let hand = this.games_map.get(gameCode).playerHands[pos];
-        this.games_map.get(gameCode).numOfLastCardsPlayed = 0;
-        for (position in cardPos){
-            this.games_map.get(gameCode).centralPile.push(hand[position]);
-            this.games_map.get(gameCode).numOfLastCardsPlayed += 1;
-        }
-    }
-
-    nextTurn(gameCode){
-        this.games_map.get(gameCode).currentPlayerTurn = 
-        (this.games_map.get(gameCode).currentPlayerTurn + 1) % this.games_map.get(gameCode).playerList.length;
-
-        this.games_map.get(gameCode).currentCardRank = this.games_map.get(gameCode).currentCardRank % 13 + 1;
-    }
     
+    cPileSize(code) {
+        return this.games_map.get(code).cPileSize();
+    }
 
+
+    cPileCollect(code){
+        return this.games_map.get(code).cPileCollect();
+    }
+
+
+    getCurrentTurn(code){
+        return this.games_map.get(code).getTurn();
+    }
+
+
+    nextTurn(code) {
+        this.games_map.get(code).nextTurn();
+    }
+
+
+    playCards(code, SID, cards, op_num){
+        return this.games_map.get(code).playCards(SID, cards, op_num);
+    }
+
+    
+    removePlayer(code, SID){
+        this.games_map.get(code).removePlayer(SID);
+    }
+
+
+    callBS(code, SID, op_num) {
+        return this.games_map.get(code).callBS(SID, op_num);
+    }
+
+    getOpNum(code) {
+        return this.games_map.get(code).getOpNum();
+    }
+
+
+    // --------------------------------------------------------
+
+    /**
+     * Deletes the specified game
+     * @param {string} lobby_code   code of lobby that game is attached to
+     * @returns {returns}           No data will be returned
+     */
+     delete(lobby_code) {
+        return this.games.delete(lobby_code);
+     }
 }
 
 const games = new Games();

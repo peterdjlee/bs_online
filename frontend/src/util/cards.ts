@@ -21,12 +21,20 @@ export const suit = [
   's',
 ];
 
-export function getCardString(card: number[]) {
-  return rank[card[0]-1] + suit[card[1]];
+export function compareCards(left: string, right: string) {
+  const rankL = rank.indexOf(left.substr(0,1));
+  const rankR = rank.indexOf(right.substr(0,1));
+  const suitL = suit.indexOf(left.substr(1));
+  const suitR = suit.indexOf(right.substr(1));
+  return (rankL*13+suitL) - (rankR*13+suitR);
 }
 
-export function getCardArray(card: string) {
-  return [rank.indexOf(card.substr(0, 1)) + 1, suit.indexOf(card.substr(1))];
+export function getCardString(card: number) {
+  return rank[(card % 52) % 13] + suit[Math.floor((card % 52) / 13)];
+}
+
+export function getCardID(card: string) {
+  return rank.indexOf(card.substr(0, 1)) + suit.indexOf(card.substr(1))*13;
 }
 
 export const rankString = [

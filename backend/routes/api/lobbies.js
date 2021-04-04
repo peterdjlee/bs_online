@@ -116,7 +116,7 @@ router.post("/started", (req, res) => {
     if (!code)
         return res.status(400).json({msg: "lobby_code required"});
     
-    return lobbies.started(code) ?
+    return lobbies.isStarted(code) ?
         res.status(200).json({started: true}):
         res.status(200).json({started: false});
 });

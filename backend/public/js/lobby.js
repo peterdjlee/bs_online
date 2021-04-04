@@ -31,12 +31,16 @@ xhr.onreadystatechange=function(){
             
             socket.on("UpdatePlayerList", (json) => {
                 var player_list = "";
-                (json.player_names).forEach(player => {
+                console.log(json);
+
+                for (let i = 0; i < json.player_names.length; i+=1) {
                     player_list += `<li class="no-bullet-list">`;
-                    if(player.socket_id == socket.id)
-                        player_list += `> `
-                    player_list += `${player}</li>`
-                });
+                    player_list += `${json.player_names[i]}`;
+                    if(json.player_active[i] == false)
+                        player_list += " (inactive)"
+                    player_list += "</li>";
+                }
+
                 display_players.innerHTML = player_list;
             });
 
@@ -62,7 +66,7 @@ xhr.onreadystatechange=function(){
                 }
                 else {
                     socket.emit("SetLobbyState", {lobby_code: lobby_code, started: false});
-                    socket.emit("PlayCard", {lobby_code: lobby_code, cardPos: 0, pos:0});
+                    socket.emit("PlayCard", {lobby_code: lobby_code, cards: [0, 1]});
                 }
             });
 
@@ -87,13 +91,23 @@ xhr.onreadystatechange=function(){
             });
 
             socket.on("UpdatePlayerHand", data => {
-                console.log("Player hand");
-                console.log(data);
+                console.log({PlayerHand: data});
             });
 
             socket.on("UpdateOtherHands", data => {
-                console.log("Other hand");
-                console.log(data);
+                console.log({OtherHands: data});
+            });
+
+            socket.on("UpdateTurnInfo", data => {
+                console.log({UpdateTurnInfo: data});
+            });
+
+            socket.on("UpdateCenterPile", data => {
+                console.log({UpdateCenterPile: data});
+            });
+
+            socket.on("PlayCardsError", data => {
+                console.log({PlayCardsError: data.msg})
             });
         }
     }

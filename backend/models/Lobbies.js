@@ -1,6 +1,12 @@
-const Lobby = require("../models/Lobby");
+/*
+    Lobbies.js
+    
+    stores data using model exported from Lobby.js.
+    manages all lobby instances and calls corresponding functions from Lobby models
+*/
 
-// Util for generating random strings
+
+const Lobby = require("../models/Lobby");
 const str_generator = require("../utils/genRdmStr");
 
 /**
@@ -52,12 +58,17 @@ class Lobbies {
      * @param {string} lobby_code   Code of lobby to retrieve from
      * @returns {returns}           returns an array of nicknames
      */
-    getPlayers(lobby_code) {
+    getPlayers(lobby_code, SID) {
         // Make sure lobby exists
         if (!this.exists(lobby_code))
             return this.retError(`Cannot find lobby "${lobby_code}"`);
 
         return this.retSuccess(this.lobbies.get(lobby_code).getPlayers());
+    }
+
+
+    isStarted(lobby_code) {
+        return this.lobbies.get(lobby_code).isStarted();
     }
 
 
@@ -98,6 +109,9 @@ class Lobbies {
     stop(socket_id, lobby_code) {
 
         const lobby = this.lobbies.get(lobby_code);
+
+        if (lobby == undefined)
+            return;
 
         // Attempt to stop lobby and return data if successful
         const result = lobby.stop(socket_id)
@@ -202,7 +216,7 @@ class Lobbies {
             return this.retError(`Cannot find lobby "${code}"`);
         else if (this.lobbies.get(code).getPlayerCount() >= this.lobbies.get(code).maxSize())
             return this.retError(`Lobby "${code}" has reached the maximum number of players`);
-        else if (this.lobbies.get(code).started())
+        else if (this.lobbies.get(code).isStarted())
             return this.retError(`Lobby "${code}"'s game has started`);
         else
             return this.retSuccess();
@@ -218,21 +232,6 @@ class Lobbies {
      */
     exists(code) {
         return (this.lobbies.has(code));
-    }
-
-
-    getPlayerLobbyInfo(socket_id) {
-        // Prepare player location info
-        if (!this.all_players.has(socket_id))
-            return this.retError(`Cannot find player`);
-        const info = this.all_players.get(socket_id);
-        
-        // Verify lobby exists
-        if (!this.exists(info.lobby_code)) 
-            return this.retError(`Cannot find lobby "${lobby_code}"`);
-
-        // Returns the lobby code and a reference to it
-        return this.retSuccess({lobby_code: info.lobby_code, local_id: info.local_id});
     }
 
 
