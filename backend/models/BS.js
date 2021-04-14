@@ -4,42 +4,44 @@
     Class for storing/modifying data and emulating a game of BS
 */
 
-const {newShuffledDeck, shuffleAndDeal, getCardStats, getCardRank} = require("../utils/genCards");
+const {shuffleAndDeal, getCardRank} = require("../utils/genCards");
 const CPile = require("../utils/gameCPile");
 const PQueue = require("../utils/gamePQueue");
 const WQueue = require("../utils/gameWQueue");
 
 class BS {
 
-    
     /**
      * Create a BS game with the given parameters
-     * @param {string} lobby_code           The code of the lobby this game is attached to
      * @param {array[string]} player_SIDs   socket id of all players in this game       
      * @param {array[string]} player_names  nickname of all players in this game
-     * @param {int} num_decks               number of deck of cards to distribute
+     * @param {object} settings             key and value of various configs for variants
      */
-    constructor(lobby_code, player_SIDs, player_names, num_decks, num_winners=1) {
-        this.code = lobby_code;
+    constructor(player_SIDs, player_names, settings) {
+
+        // Game Configs
+        this.num_winners = settings.num_winners ? settings.num_winners: 1;
+        this.num_decks = settings.num_decks ? settings.num_decks: 1;
 
         // Players Info
         this.player_SIDs = player_SIDs;
         this.player_names = player_names;
-        this.player_hands = shuffleAndDeal(this.player_SIDs.length, num_decks);
+        this.player_hands = shuffleAndDeal(this.player_SIDs.length, this.num_decks);
         this.SID_to_position = new Map();
 
-        // Game Info
+        // Game Data (Data management)
         this.center = new CPile();
         this.p_queue = new PQueue(player_SIDs.length);
+        this.win_queue = new WQueue();
+        this.operation_num = 0;
+
+        // Game Data (Current turn info)
         this.turn_count = 1;
         this.cur_turn_pos = this.p_queue.next();
         this.cur_turn_exp_rank = 0;
-        this.operation_num = 0;
-        this.bs_called = false;  // Only 1 BS can be called per turn
-        this.num_winners = num_winners;
-        this.win_queue = new WQueue();
+        this.cur_turn_bs_called = false;  // Only 1 BS can be called per turn
 
-        // Fill data
+        // Fill map for quick retrieval of positions
         for(let i = 0; i < player_SIDs.length; i++) {
             this.SID_to_position.set(player_SIDs[i], i);
         }
@@ -70,7 +72,7 @@ class BS {
     /**
      * returns turn information of the current turn
      */
-     getTurn() {
+    getTurn() {
         return {
             pos: this.cur_turn_pos,
             nickname:  this.player_names[this.cur_turn_pos],
@@ -89,26 +91,20 @@ class BS {
     //  The following functions are all used by players to perform certain actions
     //  Security checks will be performed before allowing modification
 
-
     /**
      * Player plays card(s) from their hand
      * @param {string} SID          socket id of player that's playing the card
      * @param {array[int]} cards    array of cards to play
      * @returns {
-     *              count: int, 
-     *              pos: int, 
-     *              nickname: string, 
-     *              stop_game: {
-     *                  passed: boolean, 
-     *                  data = [{
-     *                      nickname: string, 
-     *                      pos: int
-     *                  }]
+     *              passed: boolean,
+     *              data: {
+     *                  count: int, 
+     *                  pos: int, 
+     *                  nickname: string, 
      *              }
      *          }
-     *     returns info for the player that just played the card (count(number of cards on hand), pos, nickname)
-     *     stop_game.passed passed determines if there is winner
-     *     if stop_game.passed is true, information for winners will be in stop_game.data
+     *          passed gives status of operation
+     *          data provides context of player and cards played
      */
     playCards(SID, cards, op_num) {
         const pos = this.SID_to_position.get(SID);
@@ -131,9 +127,6 @@ class BS {
         this.center.push(pos, cards, this.cur_turn_exp_rank);
         this.nextTurn();
 
-        // See if the game should be stopped and winners declared
-        const stop_game = this.declareWinner();
-
         // Player is set up for victory
         if (this.player_hands[pos].length === 0)
             this.win_queue.push(pos);
@@ -141,8 +134,7 @@ class BS {
         return this.retSuccess({
             count: this.player_hands[pos].length, 
             pos: pos, 
-            nickname: this.player_names[pos],
-            stop_game: stop_game
+            nickname: this.player_names[pos]
         });
     }
 
@@ -152,15 +144,15 @@ class BS {
      * @param {string} source_SID   socket id of player that called BS
      * @param {int} op_num          op_num to prevent call made with outdated info 
      * @returns {passed: boolean, data: (check below)}        
-     *                              passed gives info on result of BS call
-     *                              data returns extra info on context of the call             
+     *                              passed tells whether BS call was successful
+     *                              data returns extra info on the context of the call             
      */
     callBS(source_SID, op_num) {
 
         // Security checks
-        if (this.bs_called)
+        if (this.cur_turn_bs_called)
             return this.retError("BS has already been called this turn");
-        this.bs_called = true;
+        this.cur_turn_bs_called = true;
         if (op_num !== this.operation_num) {
             if(op_num !== -1)
                 return this.retError("Local information is outdated and action cannot be processed (qefw)");
@@ -197,7 +189,9 @@ class BS {
         });
     }
 
+
     // ------- Central pile functions ------------------
+
 
     // Get size of central pile
     cPileSize() {
@@ -239,16 +233,8 @@ class BS {
         this.playerAddCards(pos, cards);
     }
 
-    /**
-     * If conditions for stopping game are met, return true with the relevenat info
-     */
+    // If conditions for stopping game are met, return true with the relevenat info
     declareWinner() {
-        
-        // Game is only stopped on turns with a new declared winner
-        const new_winner = this.win_queue.popAndGet();
-        if (new_winner == -1)
-            return this.retError();
-
 
         // If number of winners is sufficient
         const cur_num_winners = this.win_queue.getWinnersCount();
@@ -263,31 +249,31 @@ class BS {
             );
         }
 
-        // If only 1 player left => time to end game
-        if (this.p_queue.getCount() === 1) {
+        // If number of players left combined with winners is enough to end game
+        const cur_num_players = this.p_queue.getCount();
+        if (cur_num_players + cur_num_winners === this.num_winners) {
 
-            // No winners, default to last player winning (if all but 1 player DCs)
-            if (cur_num_winners === 0) {
-                const pos = this.p_queue.getCurrent();
-                return this.retSuccess(
-                    [{nickname: this.player_names[pos], position: pos}]
-                );
+            this.cur_turn_pos = -1;
+
+            // Fast track all players through winning process
+            for (let i = 0, new_pos = -1; i < cur_num_players; i+=1) {
+                new_pos = this.p_queue.next();
+                this.win_queue.push(new_pos);
+                const pos_winner = this.win_queue.pop();
+                this.p_queue.remove(pos_winner);
             }
 
-            // Last player left is the loser and everyone else won
-            else {
-                return this.retSuccess(
-                    this.win_queue.getWinners().map(pos => { 
-                        return {
-                            nickname: this.player_names[pos], 
-                            position: pos
-                        }
-                    })
-                );
-            }
+            // Return list of winners with new fast tracked winners
+            return this.retSuccess(
+                this.win_queue.getWinners().map(pos => { 
+                    return {
+                        nickname: this.player_names[pos], 
+                        position: pos
+                    }
+                })
+            );
         }
 
-        this.p_queue.remove(new_winner);
         return this.retError();
     }
 
@@ -298,7 +284,11 @@ class BS {
         this.turn_count += 1;
         this.cur_turn_pos = this.p_queue.next();
         this.cur_turn_exp_rank = (this.cur_turn_exp_rank + 1) % 13;
-        this.bs_called = false;
+        this.cur_turn_bs_called = false;
+
+        const pos_winner = this.win_queue.pop();
+        if (pos_winner !== -1)
+            this.p_queue.remove(pos_winner);
     }
 
 

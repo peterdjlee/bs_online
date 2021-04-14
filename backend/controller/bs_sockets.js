@@ -20,8 +20,9 @@ exports = module.exports = (io) => {
                 io.in(code).emit("UpdateCenterPile", {change: games.cPileSize(code)});
                 io.in(code).emit("UpdateTurnInfo", games.getCurrentTurn(code));
 
-                if(result.data.stop_game.passed) {
-                    io.in(code).emit("GameOver", result.data.stop_game.data);
+                const stop_game = games.declareWinner(code);
+                if(stop_game.passed) {
+                    io.in(code).emit("GameOver", stop_game.data);
                 }
             }
             

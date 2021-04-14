@@ -76,6 +76,29 @@ exports = module.exports = (io) => {
             }
         });
 
+        /*
+        socket.on("CreateGame", info => {
+            const lobby_code = info.lobby_code;
+            const settings = info.settings ? info.settings: {};
+       
+            const result = lobbies.start(socket.id, lobby_code);
+            if (result.passed) {
+                games.createGame(lobby_code, result.data.player_SIDs, result.data.player_names, settings);
+                io.in(lobby_code).emit("StartGame", {});
+            }
+            else
+                socket.emit("SetLobbyStateError", result.msg);
+        });
+
+        socket.on("DeleteGame", info => {
+            const result = lobbies.stop(socket.id, lobby_code);
+            if (result.passed) {
+                io.in(lobby_code).emit("StopGame", {});
+            }
+            else
+                socket.emit("SetLobbyStateError", result.msg);
+        });
+        */
 
         /**
          * Default socket.io disconnect listener
@@ -86,15 +109,25 @@ exports = module.exports = (io) => {
             const result = lobbies.removePlayerDC(id);
             if (result.passed) {
                 const has_game = lobbies.isStarted(result.data.lobby_code);
+
+                // Delete data for lobby if all players have left
                 if(result.data.players.player_names.length == 0) {
                     if (has_game)
                         games.delete(result.data.lobby_code);
                     lobbies.delete(result.data.lobby_code);
                 }
+
+                // Update lobby/game info for players leaving
                 else {
                     if (has_game) {
                         games.removePlayer(result.data.lobby_code, id);
                         io.in(result.data.lobby_code).emit("UpdateTurnInfo", games.getCurrentTurn(result.data.lobby_code));
+                        
+                        // Stop game if conditions met
+                        const stop_game = games.declareWinner(result.data.lobby_code);
+                        if(stop_game.passed) {
+                            io.in(result.data.lobby_code).emit("GameOver", stop_game.data);
+                        }
                     }
                     socket.broadcast.to(result.data.lobby_code).emit("UpdatePlayerList", result.data.players);
                 }

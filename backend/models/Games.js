@@ -16,8 +16,8 @@ class Games{
 
     // - Intermediate functions that locate a specific lobby and call corresponding functions -
 
-    createGame(code, playerList, playerNames, numDecks=1){
-        this.games_map.set(code, new BS(code, playerList, playerNames, numDecks));
+    createGame(code, playerList, playerNames, settings={}){
+        this.games_map.set(code, new BS(playerList, playerNames, settings));
     }
 
 
@@ -67,6 +67,10 @@ class Games{
 
     getOpNum(code) {
         return this.games_map.get(code).getOpNum();
+    }
+
+    declareWinner(code) {
+        return this.games_map.get(code).declareWinner();
     }
 
 
