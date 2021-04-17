@@ -71,7 +71,10 @@ function Game(props: RouterProps) {
       ${result.caller_name}
       ${result.was_bs ? 'correctly' : 'incorrectly'}
       called BS on ${result.callee_name}`));
-    socket.on('GameOver', result => setWinner(result[0].nickname));
+    socket.on('GameOver', result => {
+      setWinner(result[0].nickname);
+      socket.emit('CloseBSSockets');
+    });
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 

@@ -8,18 +8,19 @@ exports = module.exports = (io) => {
         /**
          * @param {lobby_code: string, nickname: string}
          */
-        socket.on("AddPlayer", info => {
-            const code = info.lobby_code;
+        socket.on("AddPlayer", param => {
+            const code = param.lobby_code;
             const id = socket.id;
-            const nickname = info.nickname ? info.nickname: "Player";
+            const nickname = param.nickname ? param.nickname: "Player";
 
             // Attempt to add player
             const result = lobbies.addPlayer(id, code, nickname);
             if (result.passed) {
-                // join player to socket room and emit information to players in the same room
+
+                // join player to socket room and emit paramrmation to players in the same room
                 socket.join(code);
-                socket.emit("UpdatePlayerList", result.data.players, result.data.own_LID);
-                socket.broadcast.to(code).emit("UpdatePlayerList", result.data.players);
+                //socket.emit("GetOwnInfo", {local_id: result.data.add[0].local_id});
+                io.in(code).emit("UpdatePlayerList", lobbies.getPlayersDisplay(code));
             }
             else {
                 socket.emit("AddPlayerError", {msg: result.msg});
@@ -30,107 +31,72 @@ exports = module.exports = (io) => {
         /**
          * @param {lobby_code: {string}, nickname: {string}}
          */
-        socket.on("ChangePlayerName", info => {
+        socket.on("ChangePlayerName", param => {
             const id = socket.id; // Player's id retrieved from socket connection => harder to tamper
-            const code = info.lobby_code;
-            const nickname = info.nickname;
+            const code = param.lobby_code;
+            const nickname = param.nickname;
 
             // Attempt to change player name and emit events accordingly
             const result = lobbies.setPlayerName(id, code, nickname);
-            if (result.passed) {
-                socket.emit("UpdatePlayerList", result.data.players);
-                socket.broadcast.to(code).emit("UpdatePlayerList", result.data.players);
-            }
+            if (result.passed)
+                io.in(code).emit("UpdatePlayerList", lobbies.getPlayersDisplay(code));
             else
-                socket.emit("ChangePlayerNameError", {msg: result.msg});
+                socket.emit("ErrorMessage", {msg: result.msg});
         });
-
+    
 
         /**
-         * If lobby state is true => game started
-         * @param {lobby_code: string, started: boolean}
+         * When the start game button is clicked in lobby
+         * @param {lobby_code: {string}, settings: obj}
          */
-        socket.on("SetLobbyState", info => {
-            const new_state = info.started;
-            const lobby_code = info.lobby_code;
-            
-            // start or stop lobby if requested game state does not match current state
-            if (new_state) {
-                const result = lobbies.start(socket.id, lobby_code);
-                if (result.passed) {
-                    games.createGame(lobby_code, result.data.player_SIDs, result.data.player_names);
-                    socket.emit("StartGame" , {});
-                    socket.broadcast.to(lobby_code).emit("StartGame", {});
-                }
-                else
-                    socket.emit("SetLobbyStateError", result.msg);
-            }
-            else {
-                const result = lobbies.stop(socket.id, lobby_code);
-                if (result.passed) {
-                    socket.emit("StopGame" , {});
-                    socket.broadcast.to(lobby_code).emit("StopGame", {});
-                }
-                else
-                    socket.emit("SetLobbyStateError", result.msg);
-            }
-        });
+        socket.on("CreateGame", param => {
+            const lobby_code = param.lobby_code;
+            const settings = param.settings ? param.settings: {};
 
-        /*
-        socket.on("CreateGame", info => {
-            const lobby_code = info.lobby_code;
-            const settings = info.settings ? info.settings: {};
-       
             const result = lobbies.start(socket.id, lobby_code);
             if (result.passed) {
-                games.createGame(lobby_code, result.data.player_SIDs, result.data.player_names, settings);
+                const cur_player_data = lobbies.getPlayersGame(lobby_code);
+                games.createGame(lobby_code, cur_player_data.player_SIDs, cur_player_data.player_names, settings);
                 io.in(lobby_code).emit("StartGame", {});
             }
             else
-                socket.emit("SetLobbyStateError", result.msg);
+                socket.emit("ErrorMessage", {msg: result.msg});
         });
 
-        socket.on("DeleteGame", info => {
+
+        /**
+         * When the game ends. Game data actually isn't deleted 
+         * @param {lobby_code: {string}, settings: obj}
+         */
+        socket.on("DeleteGame", param => {
+            const lobby_code = param.lobby_code;
             const result = lobbies.stop(socket.id, lobby_code);
             if (result.passed) {
                 io.in(lobby_code).emit("StopGame", {});
+                io.in(lobby_code).emit("UpdatePlayerList", lobbies.getPlayersDisplay(lobby_code));
             }
             else
-                socket.emit("SetLobbyStateError", result.msg);
+                socket.emit("ErrorMessage", {msg: result.msg});
         });
-        */
+
 
         /**
          * Default socket.io disconnect listener
+         * Delete player data and lobby data if last player left
          */
         socket.on("disconnect", () => {
-            const id = socket.id;
-
-            const result = lobbies.removePlayerDC(id);
-            if (result.passed) {
-                const has_game = lobbies.isStarted(result.data.lobby_code);
+            const result = lobbies.removePlayerDC(socket.id);
+            if (result[0].passed) {
 
                 // Delete data for lobby if all players have left
-                if(result.data.players.player_names.length == 0) {
-                    if (has_game)
-                        games.delete(result.data.lobby_code);
-                    lobbies.delete(result.data.lobby_code);
+                if(result[2] == 0) {
+                    lobbies.delete(result[1]);
+                    games.delete(result[1]);
                 }
 
-                // Update lobby/game info for players leaving
-                else {
-                    if (has_game) {
-                        games.removePlayer(result.data.lobby_code, id);
-                        io.in(result.data.lobby_code).emit("UpdateTurnInfo", games.getCurrentTurn(result.data.lobby_code));
-                        
-                        // Stop game if conditions met
-                        const stop_game = games.declareWinner(result.data.lobby_code);
-                        if(stop_game.passed) {
-                            io.in(result.data.lobby_code).emit("GameOver", stop_game.data);
-                        }
-                    }
-                    socket.broadcast.to(result.data.lobby_code).emit("UpdatePlayerList", result.data.players);
-                }
+                // Update lobby to account for player leaving
+                else
+                    socket.broadcast.to(result[1]).emit("UpdatePlayerList", lobbies.getPlayersDisplay(result[1]));
             }
         });
 

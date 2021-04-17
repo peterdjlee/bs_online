@@ -4,45 +4,59 @@
     Class object for simulating a lobby that players can join/leave
 */
 
+/**
+ * Common return values
+ * @returns {passed: boolean, msg: string, data: ChangeList} - 
+ *          *passed provides info on whether operation was successful
+ *          *msg provides info on what happened if operation was not successful
+ *          *data generally provides an object made up of 3 arrays 
+ *              that instruct whether to add/remove/edit a player
+ *              The instruction type depends on the operation
+ */
+
 class Lobby {
 
     /**
      * Create a lobby object with given parameters
-     * @param {string} code         string identifier for this lobby
      * @param {int} max_players     maximum number of players allowed
      * @param {boolean} dup_names   if duplicate names are allowed
      */
-    constructor(code, max_players=6, dup_names=false) {
+    constructor(max_players=6, dup_names=false) {
 
         // Lobby settings
         this.max_players = max_players;
         this.dup_names = dup_names;
 
         // Lobby Variables
-        this.code = code;
         this.auto_inc = 0;
         this.game_started = false;
 
-        // player list arrays (Kept separate to use with built in functions)
-        this.players_name = [];
-        this.players_LID = [];
-        this.players_SID = [];      
-        this.players_active = [];
-        this.player_tags = [];
+        // Arrays with primitive values have really fast native functions. idk why.
+        this.p_name = [];
+        this.p_lid = [];
+        this.p_sid = [];      
+        this.p_active = [];
+        this.p_tags = [];
     }
 
 
-    /**
-     * Get info of current players in lobby
-     * @returns object containing a parallel arrays of player nicknames and local ids
-     */
-    getPlayers() {
+    // Give enough info to display list of players
+    toDisplay() {
         return {
-            player_names: this.players_name,
-            player_LIDs: this.players_LID,
-            player_active: this.players_active
+            player_names: this.p_name,
+            player_LIDs: this.p_lid,
+            player_active: this.p_active
         };
     };
+
+
+    // Give enough info to create a game object using existing player list
+    toGame() {
+        return {
+            player_names: this.p_name,
+            player_SIDs: this.p_sid,
+        }
+    }
 
 
     isStarted() {
@@ -50,42 +64,29 @@ class Lobby {
     };
 
 
-    getPlayerCount() {
-        return this.players_LID.length;
-    };
-
-
-    /**
-     * Get all socket info of players, meant for use by game object
-     * @returns array of socket ids of the current players in the lobby
-     */
-    getPlayerSIDs() {
-        return this.players_SID;
+    full() {
+        return this.max_players <= this.p_active.length;
     }
 
-    getPlayerNames() {
-        return this.players_name;
-    }
-
-    maxSize() {
-        return this.max_players;
+    count() {
+        return this.p_active.length;
     }
 
 
     /**
-     * Add a player with the specified socket id and name to the lobby
-     * @param {string} socket_id    id of socket connecting player
-     * @param {string} nickname     nickname of player
-     * @returns {int}               a local id to find player in lobby
+     * Adds a player to the specified lobby
+     * @param {string} socket_id    ID of the player's socket connection
+     * @param {string} nickname     Nickname for the player (Optional)
+     * @returns {passed: boolean, msg: string, data: ChangeList}
      */
     addPlayer(socket_id, nickname) {
         
         // Check if lobby full
-        if (this.players_name.length >= this.max_players)
+        if (this.p_name.length >= this.max_players)
             return this.retError("Lobby has reached maximum capacity");
         
         // Check if duplicate names are allowed
-        if (!this.dup_names && this.players_name.includes(nickname))
+        if (!this.dup_names && this.p_name.includes(nickname))
             return this.retError("Lobby contains a player with the same name");
 
         // Check if game has already started
@@ -93,62 +94,126 @@ class Lobby {
             return this.retError("Lobby game has already started")
 
         // Add player with a unique local ID
-        this.players_name.push(nickname);
-        this.players_LID.push(this.auto_inc);
-        this.players_SID.push(socket_id);
-        this.players_active.push(true);
+        this.p_name.push(nickname);
+        this.p_lid.push(this.auto_inc);
+        this.p_sid.push(socket_id);
+        this.p_active.push(true);
+        this.p_tags.push([]);
         this.auto_inc += 1;
 
-        return this.retSuccess({local_id: this.auto_inc - 1});
+        return this.retSuccess({
+            add: [
+                {
+                    local_id: this.auto_inc - 1,
+                    nickname: nickname,
+                    active: true
+                }
+            ],
+            remove: [],
+            edit: []
+        });
     };
 
 
     /**
-     * Remove a player with the given local id
-     * @param {int} local_id    id of player to be removed 
-     * @returns                 nothing important
+     * Removes a player from the specified lobby
+     * @param {string} socket_id    ID of the player's socket connection
+     * @returns {passed: boolean, msg: string, data: ChangeList}
      */
     removePlayerDC(local_id) {
-        const index = this.players_LID.indexOf(local_id);
+        const index = this.p_lid.indexOf(local_id);
+        if (index === -1)
+            return this.retError();
 
-        if (index == -1)
-            return this.retError("Player does not exist (aivm)");
+        this.p_name.splice(index, 1);
+        this.p_lid.splice(index, 1);   
+        this.p_sid.splice(index, 1);
+        this.p_active.splice(index, 1);
+        this.p_tags.splice(index, 1);
 
-        if (this.game_started)
-            this.players_active[index] = false;
-        else {
-            this.players_name.splice(index, 1);
-            this.players_LID.splice(index, 1);   
-            this.players_SID.splice(index, 1);
-            this.players_active.splice(index, 1);
-        }
+        return this.retSuccess({
+            add: [],
+            remove: [local_id],
+            edit: []
+        });
+    }
 
-        return this.retSuccess();
-    };
+
+    /**
+     * Disables a player when they DC during the middle of a game
+     * @param {string} socket_id    ID of the player's socket connection
+     * @returns {passed: boolean, msg: string, data: ChangeList}
+     */
+    disablePlayer(local_id) {
+        const index = this.p_lid.indexOf(local_id);
+        if (index === -1)
+            return this.retError();
+        
+        this.p_active[index] = false;
+
+        return this.retSuccess({
+            add: [],
+            remove: [],
+            edit: [
+                {
+                    local_id: local_id, 
+                    nickname: this.p_name[index], 
+                    active: this.p_active[index]
+                }
+            ]
+        });
+    }
 
 
     /**
      * Sets the specified player's nickname
      * @param {string} socket_id   socket id of player
      * @param {string} nickname    new nickname to set player to
-     * @returns {passed: bool, data: n/a, msg: string} whether the operation was 
-     *                                                 successful (passed), and 
-     *                                                 the error message (msg) if not
+     * @returns {passed: boolean, msg: string, data: ChangeList}
      */
     setPlayerName(socket_id, nickname) {
 
         // Check if duplicate names are allowed
-        if (!this.dup_names && this.players_name.includes(nickname))
+        if (!this.dup_names && this.p_name.includes(nickname))
             return this.retError("Lobby contains a player with the same name");
 
         // Get and check if player exists
-        const index = this.players_SID.indexOf(socket_id);
+        const index = this.p_sid.indexOf(socket_id);
         if (index == -1)
             return this.retError("Player does not exist / Permission error (edbs)");
 
-        this.players_name[index] = nickname;
-        return this.retSuccess({});
+        this.p_name[index] = nickname;
+        return this.retSuccess({
+            add: [],
+            remove: [],
+            edit: [
+                {
+                    local_id: this.p_lid[index], 
+                    nickname: nickname, 
+                    active: this.p_active[index]
+                }
+            ]
+        });
     };
+
+
+    // Game ends and all DCed players must be removed
+    purge() {
+        const purged_ids = [];
+
+        for (let i = this.p_active.length - 1; i >= 0; i-=1) {
+            if (!this.p_active[i]) {
+                purged_ids.push(this.p_lid[i]);
+                this.p_name.splice(i, 1);
+                this.p_lid.splice(i, 1);   
+                this.p_sid.splice(i, 1);
+                this.p_active.splice(i, 1);
+                this.p_tags.splice(i, 1);
+            }
+        }
+
+        return purged_ids;
+    }
 
 
     /**
@@ -164,7 +229,7 @@ class Lobby {
             return this.retError("Game already started");
 
         // Security check (MODIFY IF )
-        if (!this.permissionCheckLow(source_SID))
+        if (!this.p_sid.includes(source_SID))
             return this.retError("Permission error");
 
         this.game_started = true;
@@ -185,25 +250,22 @@ class Lobby {
             return this.retError("Game hasn't started");
 
         // Security check
-        if (!this.permissionCheckLow(source_SID))
+        if (!this.p_sid.includes(source_SID))
             return this.retError("Permission error");
 
+        // Remove all disabled players and reset lobby state
         this.game_started = false;
-        return this.retSuccess();
+
+        return this.retSuccess({
+            add: [],
+            remove: this.purge(),
+            edit: []
+        });
     };
 
 
-    /**
-     * Check if a given player is allowed to modify lobby (low => if player is in lobby)
-     * @param {string} socket_id    socket id of player performing an operation
-     * @returns 
-     */
-    permissionCheckLow(socket_id) {
-        return this.players_SID.includes(socket_id);
-    }
+    // ------------------------------ Return Helpers ------------------------------
 
-
-    // Return helpers to format function return statuses
     retSuccess(data={}, msg='') {
         return {passed: true, data: data, msg: msg}
     };
@@ -221,7 +283,7 @@ class Lobby {
             auto_inc: this.auto_inc = 0,
             max_players:this.max_players,
             dup_names: this.dup_names,
-            LIDs: this.players_LID
+            LIDs: this.p_lid
         };
     }
 }

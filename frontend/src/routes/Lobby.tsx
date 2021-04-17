@@ -54,9 +54,8 @@ function Lobby(props: RouterProps) {
   const setNotification = useContext(NotificationContext);
   const gameLink = window.location.host + "/join/" + player.room;
   const handleStartGame = () => {
-    socket.emit('SetLobbyState', {
-      lobby_code: player.room,
-      started: true
+    socket.emit('CreateGame', {
+      lobby_code: player.room
     });
   }
 
@@ -70,8 +69,10 @@ function Lobby(props: RouterProps) {
         setNotification(json.msg);
         props.history.goBack();
       });
-      socket.on('StartGame', () =>
-        props.history.push('/play'));
+      socket.on('StartGame', () => {
+        socket.emit('OpenBSSockets');
+        props.history.push('/play');
+      });
       socket.emit('AddPlayer', {
         lobby_code: player.room,
         nickname: player.nickname

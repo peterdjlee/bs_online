@@ -33,6 +33,7 @@ class BS {
         this.center = new CPile();
         this.p_queue = new PQueue(player_SIDs.length);
         this.win_queue = new WQueue();
+        this.game_ended = false;
         this.operation_num = 0;
 
         // Game Data (Current turn info)
@@ -86,6 +87,75 @@ class BS {
         return this.operation_num;
     }
 
+
+    /**
+     * Checks if the number of winners are sufficient and return winner data
+     * @returns {
+     *              passed: boolean
+     *              data: [{nickname: string, position: int}]
+     *          }
+     *              passed is true => game should be stopped and winners declared
+     *              data contains an array of all winners in the game
+     */
+    declareWinner() {
+
+        // If number of winners is sufficient
+        const cur_num_winners = this.win_queue.getWinnersCount();
+        if (cur_num_winners >= this.num_winners) {
+            this.game_ended = true;
+            this.cur_turn_pos = -1;
+            return this.retSuccess(
+                this.win_queue.getWinners().map(pos => { 
+                    return {
+                        nickname: this.player_names[pos], 
+                        position: pos
+                    }
+                })
+            );
+        }
+
+        return this.retError();
+    }
+
+    /**
+     * When players DC check if the number of players left will force game to end
+     * @returns same as declareWinners() returns
+     */
+    declareWinnerDC() {
+        
+        // Function is called when each player DCs. Prevent multiple declarations of winners.
+        if (this.game_ended)
+            return this.retError();
+
+        // If number of players left combined with winners is enough to end game
+        const cur_num_winners = this.win_queue.getWinnersCount();
+        const cur_num_players = this.p_queue.getCount();
+        if (cur_num_players + cur_num_winners === this.num_winners) {
+
+            this.cur_turn_pos = -1;
+            this.game_ended = true;
+
+            // Fast track all players through winning process
+            for (let i = 0, new_pos = -1; i < cur_num_players; i+=1) {
+                new_pos = this.p_queue.next();
+                this.win_queue.push(new_pos);
+                const pos_winner = this.win_queue.pop();
+                this.p_queue.remove(pos_winner);
+            }
+
+            // Return list of winners with new fast tracked winners
+            return this.retSuccess(
+                this.win_queue.getWinners().map(pos => { 
+                    return {
+                        nickname: this.player_names[pos], 
+                        position: pos
+                    }
+                })
+            );
+        }
+
+        return this.retError();
+    }
 
     // ------------------ Player Functions ---------------------
     //  The following functions are all used by players to perform certain actions
@@ -218,6 +288,7 @@ class BS {
         this.player_hands[pos] = this.player_hands[pos].filter(card => !cards.includes(card));
     }
 
+    // If any of the cards played doesn't match expected rank
     isPlayBS(play) {
         for (let i = 0; i < play.cards.length; i+=1) {
             const rank = getCardRank(play.cards[i]);
@@ -231,50 +302,6 @@ class BS {
     playerBSed(pos) {
         const cards = this.center.popAll();
         this.playerAddCards(pos, cards);
-    }
-
-    // If conditions for stopping game are met, return true with the relevenat info
-    declareWinner() {
-
-        // If number of winners is sufficient
-        const cur_num_winners = this.win_queue.getWinnersCount();
-        if (cur_num_winners >= this.num_winners) {
-            return this.retSuccess(
-                this.win_queue.getWinners().map(pos => { 
-                    return {
-                        nickname: this.player_names[pos], 
-                        position: pos
-                    }
-                })
-            );
-        }
-
-        // If number of players left combined with winners is enough to end game
-        const cur_num_players = this.p_queue.getCount();
-        if (cur_num_players + cur_num_winners === this.num_winners) {
-
-            this.cur_turn_pos = -1;
-
-            // Fast track all players through winning process
-            for (let i = 0, new_pos = -1; i < cur_num_players; i+=1) {
-                new_pos = this.p_queue.next();
-                this.win_queue.push(new_pos);
-                const pos_winner = this.win_queue.pop();
-                this.p_queue.remove(pos_winner);
-            }
-
-            // Return list of winners with new fast tracked winners
-            return this.retSuccess(
-                this.win_queue.getWinners().map(pos => { 
-                    return {
-                        nickname: this.player_names[pos], 
-                        position: pos
-                    }
-                })
-            );
-        }
-
-        return this.retError();
     }
 
 
@@ -291,15 +318,15 @@ class BS {
             this.p_queue.remove(pos_winner);
     }
 
-
-    /**
-     * @param {string} SID  socket id of player to remove 
-     */
+    // Remove the player from the game and its logic
     removePlayer(SID) {
         const pos = this.SID_to_position.get(SID);
+        if (pos === -1)
+            return false;
         if (this.cur_turn_pos == pos)
             this.nextTurn();
         this.p_queue.remove(pos);
+        return true;
     }
 
     // -------------- Return Helpers -------------------------

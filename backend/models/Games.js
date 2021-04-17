@@ -12,12 +12,16 @@ class Games{
 
     constructor() {
         this.games_map = new Map();
+
+        // Locate a player's lobby
+        this.s_id_to_code = new Map();
     }
 
     // - Intermediate functions that locate a specific lobby and call corresponding functions -
 
     createGame(code, playerList, playerNames, settings={}){
         this.games_map.set(code, new BS(playerList, playerNames, settings));
+        playerList.forEach(s_id => this.s_id_to_code.set(s_id, code));
     }
 
 
@@ -57,7 +61,8 @@ class Games{
 
     
     removePlayer(code, SID){
-        this.games_map.get(code).removePlayer(SID);
+        this.s_id_to_code.delete(SID);
+        return this.games_map.get(code).removePlayer(SID);
     }
 
 
@@ -73,16 +78,22 @@ class Games{
         return this.games_map.get(code).declareWinner();
     }
 
+    declareWinnerDC(code) {
+        return this.games_map.get(code).declareWinnerDC();
+    }
+
+    getCodeOfSID(s_id) {
+        return this.s_id_to_code.get(s_id);
+    }
+
+    has(code) {
+        return this.games_map.has(code);
+    }
 
     // --------------------------------------------------------
 
-    /**
-     * Deletes the specified game
-     * @param {string} lobby_code   code of lobby that game is attached to
-     * @returns {returns}           No data will be returned
-     */
      delete(lobby_code) {
-        return this.games.delete(lobby_code);
+        return this.games_map.delete(lobby_code);
      }
 }
 

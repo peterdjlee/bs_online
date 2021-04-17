@@ -7,9 +7,6 @@ const {newShuffledDeck, shuffleAndDeal, getCardRank} = require("./utils/genCards
 const BS = require("./models/BS")
 const WQueue = require("./utils/gameWQueue");
 
-function add1(num) {
-    return num+1;
-}
 
 // --- Testing data ---
 const test_player_names = ["A", "B", "C", "D", "E", "F", "G"]
@@ -54,14 +51,17 @@ for (let i = 0; i < 52; i+=1) test_deck.push(i);
 var test_rm_deck = [];
 for (let i = 26; i < 52; i+=1) test_rm_deck.push(i);
 
-const test_BS = new BS("AAAA", test_player_SIDs, test_player_names, 1);
 
-const test_W_queue = new WQueue();
+for (let j = 0; j < 5; j += 1) {
+
+}
 
 // --------------------
 var start = window.performance.now();
 
-for (let i = 0; i < 10000000; i += 1) {
+for (let i = 0; i < 100000; i += 1) {
+    const x = p_list.count();
+    
 }
 
 var end = window.performance.now();
