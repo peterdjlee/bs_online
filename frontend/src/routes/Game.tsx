@@ -46,6 +46,7 @@ function Game(props: RouterProps) {
   };
 
   const playTurn = () => {
+    if (selectedCards.length === 0) return;
     socket.emit('PlayCard', {
       lobby_code: player.room,
       cards: selectedCards.map(getCardID)
