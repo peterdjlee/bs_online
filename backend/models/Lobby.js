@@ -50,6 +50,12 @@ class Lobby {
     };
 
 
+    // For returning the old name of a player in case of change name error
+    getCurrentName(socket_id) {
+        return this.p_name[this.p_sid.indexOf(socket_id)];
+    }
+
+
     // Give enough info to create a game object using existing player list
     toGame() {
         return {

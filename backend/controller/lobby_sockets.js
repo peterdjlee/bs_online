@@ -41,7 +41,7 @@ exports = module.exports = (io) => {
             if (result.passed)
                 io.in(code).emit("UpdatePlayerList", lobbies.getPlayersDisplay(code));
             else
-                socket.emit("ErrorMessage", {msg: result.msg});
+                socket.emit("ChangePlayerNameError", {old_name: result.data.old_name, msg: result.msg});
         });
     
 

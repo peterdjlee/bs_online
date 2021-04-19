@@ -163,7 +163,7 @@ class Lobbies {
     setPlayerName(socket_id, lobby_code, nickname) {
         return this.lobbies.has(lobby_code) ?
             this.lobbies.get(lobby_code).setPlayerName(socket_id, nickname):
-            this.retError("Invalid lobby code");
+            this.retError("Invalid lobby code", {old_name: this.lobbies.get(lobby_code).getCurrentName(socket_id)});
     }
 
 
@@ -211,7 +211,7 @@ class Lobbies {
      * @param   {string} error_desc message describing what caused error
      * @returns {returns}
      */
-    retError(error_desc="") {
+    retError(error_desc="", data={}) {
         return {passed: false, msg: error_desc, data: {}};
     }
 
