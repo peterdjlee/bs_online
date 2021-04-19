@@ -34,6 +34,8 @@ function Game(props: RouterProps) {
   const [pileCount, setPileCount] = useState(0);
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [winner, setWinner] = useState<string>();
+  const [playedCards, setPlayedCards] = useState({ pos: 0, count: 0 });
+  const [bsDest, setBsDest] = useState(-1);
 
   const toggleCard = card => {
     if (selectedCards.includes(card)) {
@@ -66,12 +68,23 @@ function Game(props: RouterProps) {
     socket.on('UpdateTurnInfo', turn => setTurn(turn));
     socket.on('UpdateCenterPile', e => setPileCount(pileCount + e.change));
     socket.on('PlayCardsError', e => setNotification(e.msg));
-    socket.on('BSResult', result =>
+    socket.on('BSResult', result => {
+      if (result.was_bs) {
+        setBsDest(result.callee_pos);
+      } else {
+        setBsDest(result.caller_pos);
+      }
+      setTimeout(() => setBsDest(-1), 1000);
       setNotification(`
-      ${result.caller_name}
-      ${result.was_bs ? 'correctly' : 'incorrectly'}
-      called BS on ${result.callee_name}`));
-    socket.on('GameOver', result => setWinner(result[0].nickname));
+        ${result.caller_name}
+        ${result.was_bs ? 'correctly' : 'incorrectly'}
+        called BS on ${result.callee_name}`);
+    });
+    socket.on('GameOver', result => {
+      setWinner(result[0].nickname);
+      socket.emit('CloseBSSockets');
+    });
+    socket.on('PlayCardEvent', e => setPlayedCards(e));
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 
@@ -84,7 +97,9 @@ function Game(props: RouterProps) {
       justifyContent="center">
       <Table
         hands={table}
-        turn={turn.pos} />
+        turn={turn.pos}
+        played={playedCards}
+        bsPos={bsDest} />
       <Box
         width={TABLE_WIDTH}
         height={TABLE_HEIGHT}

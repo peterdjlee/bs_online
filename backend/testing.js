@@ -3,9 +3,10 @@ const lobbies = require("./models/Lobbies");
 const { window } = new JSDOM();
 const CPile = require("./utils/gameCPile");
 const PQueue = require("./utils/gamePQueue");
-const {newShuffledDeck, shuffleAndDeal, getCardStats} = require("./utils/genCards");
+const {newShuffledDeck, shuffleAndDeal, getCardRank} = require("./utils/genCards");
 const BS = require("./models/BS")
 const WQueue = require("./utils/gameWQueue");
+
 
 // --- Testing data ---
 const test_player_names = ["A", "B", "C", "D", "E", "F", "G"]
@@ -50,47 +51,17 @@ for (let i = 0; i < 52; i+=1) test_deck.push(i);
 var test_rm_deck = [];
 for (let i = 26; i < 52; i+=1) test_rm_deck.push(i);
 
-const test_BS = new BS("AAAA", test_player_SIDs, test_player_names, 1);
 
-const test_W_queue = new WQueue();
+for (let j = 0; j < 5; j += 1) {
 
-console.log(test_W_queue.pop());
-test_W_queue.push(4);
-console.log(test_W_queue.pop());
-test_W_queue.push(5);
-test_W_queue.push(6);
-test_W_queue.push(7);
-test_W_queue.push(8);
-console.log(test_W_queue.get());
-test_W_queue.remove(6);
-test_W_queue.remove(7);
-test_W_queue.remove(6);
-console.log(test_W_queue.get());
-
+}
 
 // --------------------
 var start = window.performance.now();
 
-
-
-
-for (let i = 0; i < 1; i += 1) {
-
-    const new_deck = test_deck.filter(card => !test_rm_deck.includes(card));
+for (let i = 0; i < 100000; i += 1) {
+    const x = p_list.count();
     
-    /*
-    var new_deck = [];
-    for (const card in test_deck) {
-        if (!test_rm_deck.includes(card))
-            new_deck.push(card);
-    }
-    */
-    /*
-    test_rm_deck.forEach(card => {
-        test_deck.splice(test_deck.indexOf(card), 1);
-    });
-    */
-
 }
 
 var end = window.performance.now();
