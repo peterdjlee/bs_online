@@ -11,11 +11,11 @@ const useStyles = makeStyles({
   }
 });
 
-const CARD_WIDTH = 50;
-const CARD_HEIGHT = 70;
+export const CARD_WIDTH = 50;
+export const CARD_HEIGHT = 70;
 
 // get left and top attributes by radially laying out hand
-function getPosition(pos: number, total: number) {
+export function getPosition(pos: number, total: number) {
   const radians = 2 * Math.PI * pos / total
   const left = (Math.cos(radians) + 1) * WIDTH * .8 / 2 + WIDTH * .1 - CARD_WIDTH / 2;
   const top = (Math.sin(radians) + 1) * HEIGHT * .6 / 2 + HEIGHT * .1 - CARD_HEIGHT / 2;

@@ -34,6 +34,7 @@ function Game(props: RouterProps) {
   const [pileCount, setPileCount] = useState(0);
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [winner, setWinner] = useState<string>();
+  const [playedCards, setPlayedCards] = useState({pos: 0, count: 0});
 
   const toggleCard = card => {
     if (selectedCards.includes(card)) {
@@ -75,6 +76,7 @@ function Game(props: RouterProps) {
       setWinner(result[0].nickname);
       socket.emit('CloseBSSockets');
     });
+    socket.on('PlayCardEvent', e => setPlayedCards(e));
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 
@@ -87,7 +89,8 @@ function Game(props: RouterProps) {
       justifyContent="center">
       <Table
         hands={table}
-        turn={turn.pos} />
+        turn={turn.pos}
+        played={playedCards} />
       <Box
         width={TABLE_WIDTH}
         height={TABLE_HEIGHT}
