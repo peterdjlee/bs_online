@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core';
+import { Input, makeStyles, TextField } from '@material-ui/core';
 import { Box, Button, Typography, Divider } from '@material-ui/core';
 import { SocketContext } from '../util/socket';
 import { PlayerContext } from '../util/player';
@@ -52,6 +52,8 @@ function Lobby(props: RouterProps) {
   const player = useContext(PlayerContext);
   const socket = useContext(SocketContext);
   const setNotification = useContext(NotificationContext);
+  const [newName, setNewName] = useState(player.nickname);
+
   const gameLink = window.location.host + "/join/" + player.room;
   const handleStartGame = () => {
     socket.emit('CreateGame', {
@@ -59,11 +61,20 @@ function Lobby(props: RouterProps) {
     });
   }
 
+  const changeName = e => {
+    e.preventDefault();
+    socket.emit('ChangePlayerName', {
+      nickname: newName,
+      lobby_code: player.room
+    });
+    player.nickname = newName;
+  }
+
   useEffect(() => {
     if (player.nickname === '' || player.room === '') {
       props.history.push('/');
     } else {
-      socket.on('UpdatePlayerList', json => 
+      socket.on('UpdatePlayerList', json =>
         setPlayers(json.player_names));
       socket.on('AddPlayerError', json => {
         setNotification(json.msg);
@@ -72,6 +83,11 @@ function Lobby(props: RouterProps) {
       socket.on('StartGame', () => {
         socket.emit('OpenBSSockets');
         props.history.push('/play');
+      });
+      socket.on('ChangePlayerNameError', err => {
+        setNotification(err.msg);
+        player.nickname = err.old_name;
+        console.log(err)
       });
       socket.emit('AddPlayer', {
         lobby_code: player.room,
@@ -126,6 +142,21 @@ function Lobby(props: RouterProps) {
             {p}
           </Typography>
         ))}
+        <form onSubmit={changeName}>
+          <Box display="flex">
+            <TextField
+              onChange={e => setNewName(e.target.value)}
+              label="Change nickname"
+              variant="outlined" />
+            <Button
+              type="submit"
+              className={classes.startButton}
+              variant="contained"
+              color="primary">
+              Save
+            </Button>
+          </Box>
+        </form>
       </Box>
       <Button
         variant="contained"
