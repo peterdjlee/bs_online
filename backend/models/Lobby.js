@@ -181,7 +181,7 @@ class Lobby {
 
         // Check if duplicate names are allowed
         if (!this.dup_names && this.p_name.includes(nickname))
-            return this.retError("Lobby contains a player with the same name");
+            return this.retError("Lobby contains a player with the same name", {old_name: this.getCurrentName(socket_id)});
 
         // Get and check if player exists
         const index = this.p_sid.indexOf(socket_id);
@@ -277,8 +277,8 @@ class Lobby {
     };
 
 
-    retError(error_desc) {
-        return {passed: false, msg: error_desc, data: {}};
+    retError(error_desc, data={}) {
+        return {passed: false, msg: error_desc, data: data};
     };
 
 
