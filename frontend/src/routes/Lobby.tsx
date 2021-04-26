@@ -87,7 +87,6 @@ function Lobby(props: RouterProps) {
       socket.on('ChangePlayerNameError', err => {
         setNotification(err.msg);
         player.nickname = err.old_name;
-        console.log(err)
       });
       socket.emit('AddPlayer', {
         lobby_code: player.room,

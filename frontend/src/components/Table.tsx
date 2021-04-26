@@ -45,6 +45,7 @@ function Table({ hands, turn, played, bsPos }: {
       <Box
         key={i + hands.length * played.pos}
         className={classes.playedCard}
+        // @ts-ignore
         style={{ "--order": i }}
         {...startPos}>
         <Card height={CARD_HEIGHT} back />
