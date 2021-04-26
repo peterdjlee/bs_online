@@ -55,6 +55,14 @@ class Lobby {
         return this.p_name[this.p_sid.indexOf(socket_id)];
     }
 
+    
+    // Similar to getCurrentName, but the existence of the socket id is not guaranteed
+    getName(socket_id) {
+        return this.p_sid.includes(socket_id) ?
+            this.retSuccess(this.p_name[this.p_sid.indexOf(socket_id)]):
+            this.retError();
+    }
+
 
     // Give enough info to create a game object using existing player list
     toGame() {

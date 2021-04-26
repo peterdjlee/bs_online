@@ -319,14 +319,16 @@ class BS {
     }
 
     // Remove the player from the game and its logic
+    //  Returns name for server messaging purposes
     removePlayer(SID) {
         const pos = this.SID_to_position.get(SID);
         if (pos === -1)
-            return false;
+            return this.retError();
         if (this.cur_turn_pos == pos)
             this.nextTurn();
         this.p_queue.remove(pos);
-        return true;
+
+        return this.retSuccess(this.player_names[pos]);
     }
 
     // -------------- Return Helpers -------------------------

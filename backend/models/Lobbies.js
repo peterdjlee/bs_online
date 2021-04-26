@@ -167,6 +167,19 @@ class Lobbies {
     }
 
 
+    /**
+     * Returns the name of the player with the specified socket id
+     *  Mainly for formatting chat and ensuring user exists in the room
+     * @param {string} socket_id    ID of the player's socket connection
+     * @param {string} lobby_code   Lobby which player exists in
+     * @returns 
+     */
+    getPlayerName(socket_id, lobby_code) {
+        return this.lobbies.has(lobby_code) ?
+            this.lobbies.get(lobby_code).getName(socket_id):
+            this.retError("Invalid lobby code");
+    }
+
     // ------------------------ Testing Functions ----------------------------------------
 
     clearAll() {
