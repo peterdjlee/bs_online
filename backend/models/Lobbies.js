@@ -137,7 +137,7 @@ class Lobbies {
 
         // Player without a lobby might trigger dc event under rare conditions
         if (!this.all_players.has(socket_id))
-            return this.retError();            
+            return [this.retError()];            
 
         const player_loc = this.all_players.get(socket_id);
         if (this.lobbies.has(player_loc.lobby_code)) {
@@ -149,7 +149,7 @@ class Lobbies {
                 [lobby.removePlayerDC(player_loc.local_id), player_loc.lobby_code, lobby.count()];
         }
 
-        return this.retError("Invalid lobby code");
+        return [this.retError("Invalid lobby code")];
     }
 
 
