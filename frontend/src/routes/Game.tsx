@@ -10,6 +10,7 @@ import { SocketContext } from '../util/socket';
 import { compareCards, getCardID, getCardString, rankString } from '../util/cards';
 import { NotificationContext } from '../util/notification';
 import GameOver from '../components/GameOver';
+import Chat from '../components/Chat';
 
 const useStyles = makeStyles({
   title: {
@@ -36,6 +37,7 @@ function Game(props: RouterProps) {
   const [winner, setWinner] = useState<string>();
   const [playedCards, setPlayedCards] = useState({ pos: 0, count: 0 });
   const [bsDest, setBsDest] = useState(-1);
+  const [chatMsgs, setChatMsgs] = useState<{ name: string, msg: string }[]>([]);
 
   const toggleCard = card => {
     if (selectedCards.includes(card)) {
@@ -59,6 +61,13 @@ function Game(props: RouterProps) {
       lobby_code: player.room
     });
     setSelectedCards([]);
+  }
+
+  const sendChat = msg => {
+    socket.emit('SendChat', {
+      lobby_code: player.room,
+      msg: msg
+    })
   }
 
   useEffect(() => {
@@ -89,55 +98,65 @@ function Game(props: RouterProps) {
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 
+  useEffect(() => {
+    socket.on('ChatMessage', msg => setChatMsgs([...chatMsgs, msg]));
+  }, [chatMsgs]);
+
   return (
     <Box
-      height="100vh"
       display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center">
-      <Table
-        hands={table}
-        turn={turn.pos}
-        played={playedCards}
-        bsPos={bsDest} />
+      flexDirection="row"
+      justifyContent="space-evenly">
       <Box
-        width={TABLE_WIDTH}
-        height={TABLE_HEIGHT}
+        height="100vh"
         display="flex"
         flexDirection="column"
-        justifyContent="center"
         alignItems="center"
-        position="absolute"
-        top={0}>
-        <Typography variant="h4">{rankString[turn.exp_rank]}</Typography>
-        <Box textAlign="center" p={4}>
-          <Card height={100} back />
-          <Typography>{pileCount} cards</Typography>
+        justifyContent="center">
+        <Table
+          hands={table}
+          turn={turn.pos}
+          played={playedCards}
+          bsPos={bsDest} />
+        <Box
+          width={TABLE_WIDTH}
+          height={TABLE_HEIGHT}
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          position="absolute"
+          top={0}>
+          <Typography variant="h4">{rankString[turn.exp_rank]}</Typography>
+          <Box textAlign="center" p={4}>
+            <Card height={100} back />
+            <Typography>{pileCount} cards</Typography>
+          </Box>
+          <Button
+            onClick={callBS}
+            variant="contained"
+            color="primary">
+            Call BS
+          </Button>
+        </Box>
+        <Typography variant="h4">{player.nickname}'s hand:</Typography>
+        <Box width={TABLE_WIDTH}>
+          <PlayerHand
+            cards={hand}
+            selectedCards={selectedCards}
+            cardClicked={toggleCard}
+          />
         </Box>
         <Button
-          onClick={callBS}
+          onClick={playTurn}
           variant="contained"
+          className={classes.button}
           color="primary">
-          Call BS
+          Submit
         </Button>
+        <GameOver winner={winner} />
       </Box>
-      <Typography variant="h4">{player.nickname}'s hand:</Typography>
-      <Box width={TABLE_WIDTH}>
-        <PlayerHand
-          cards={hand}
-          selectedCards={selectedCards}
-          cardClicked={toggleCard}
-        />
-      </Box>
-      <Button
-        onClick={playTurn}
-        variant="contained"
-        className={classes.button}
-        color="primary">
-        Submit
-      </Button>
-      <GameOver winner={winner} />
+      <Chat chatMsgs={chatMsgs} sendChat={sendChat} />
     </Box>
   )
 }
