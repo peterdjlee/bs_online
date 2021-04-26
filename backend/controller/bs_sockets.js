@@ -93,7 +93,7 @@ exports = module.exports = (io) => {
                     io.in(code).emit("UpdateTurnInfo", games.getCurrentTurn(code));
 
                     // Chat message to notify player left
-                    io.to(lobby_code).emit("ChatMessage", {name: "Admin", msg: `${result.data} has left the game`});
+                    io.to(code).emit("ChatMessage", {name: "Admin", msg: `${result.data} has left the game`});
                 
                     // Stop game if conditions met
                     const stop_game = games.declareWinnerDC(code);
