@@ -137,7 +137,7 @@ class Lobbies {
 
         // Player without a lobby might trigger dc event under rare conditions
         if (!this.all_players.has(socket_id))
-            return this.retError();            
+            return [this.retError()];            
 
         const player_loc = this.all_players.get(socket_id);
         if (this.lobbies.has(player_loc.lobby_code)) {
@@ -149,7 +149,7 @@ class Lobbies {
                 [lobby.removePlayerDC(player_loc.local_id), player_loc.lobby_code, lobby.count()];
         }
 
-        return this.retError("Invalid lobby code");
+        return [this.retError("Invalid lobby code")];
     }
 
 
@@ -163,9 +163,22 @@ class Lobbies {
     setPlayerName(socket_id, lobby_code, nickname) {
         return this.lobbies.has(lobby_code) ?
             this.lobbies.get(lobby_code).setPlayerName(socket_id, nickname):
-            this.retError("Invalid lobby code");
+            this.retError("Invalid lobby code", {old_name: this.lobbies.get(lobby_code).getCurrentName(socket_id)});
     }
 
+
+    /**
+     * Returns the name of the player with the specified socket id
+     *  Mainly for formatting chat and ensuring user exists in the room
+     * @param {string} socket_id    ID of the player's socket connection
+     * @param {string} lobby_code   Lobby which player exists in
+     * @returns 
+     */
+    getPlayerName(socket_id, lobby_code) {
+        return this.lobbies.has(lobby_code) ?
+            this.lobbies.get(lobby_code).getName(socket_id):
+            this.retError("Invalid lobby code");
+    }
 
     // ------------------------ Testing Functions ----------------------------------------
 
@@ -211,7 +224,7 @@ class Lobbies {
      * @param   {string} error_desc message describing what caused error
      * @returns {returns}
      */
-    retError(error_desc="") {
+    retError(error_desc="", data={}) {
         return {passed: false, msg: error_desc, data: {}};
     }
 

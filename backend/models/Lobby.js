@@ -50,6 +50,20 @@ class Lobby {
     };
 
 
+    // For returning the old name of a player in case of change name error
+    getCurrentName(socket_id) {
+        return this.p_name[this.p_sid.indexOf(socket_id)];
+    }
+
+    
+    // Similar to getCurrentName, but the existence of the socket id is not guaranteed
+    getName(socket_id) {
+        return this.p_sid.includes(socket_id) ?
+            this.retSuccess(this.p_name[this.p_sid.indexOf(socket_id)]):
+            this.retError();
+    }
+
+
     // Give enough info to create a game object using existing player list
     toGame() {
         return {
@@ -175,7 +189,7 @@ class Lobby {
 
         // Check if duplicate names are allowed
         if (!this.dup_names && this.p_name.includes(nickname))
-            return this.retError("Lobby contains a player with the same name");
+            return this.retError("Lobby contains a player with the same name", {old_name: this.getCurrentName(socket_id)});
 
         // Get and check if player exists
         const index = this.p_sid.indexOf(socket_id);
@@ -271,8 +285,8 @@ class Lobby {
     };
 
 
-    retError(error_desc) {
-        return {passed: false, msg: error_desc, data: {}};
+    retError(error_desc, data={}) {
+        return {passed: false, msg: error_desc, data: data};
     };
 
 

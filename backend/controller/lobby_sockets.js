@@ -41,7 +41,7 @@ exports = module.exports = (io) => {
             if (result.passed)
                 io.in(code).emit("UpdatePlayerList", lobbies.getPlayersDisplay(code));
             else
-                socket.emit("ErrorMessage", {msg: result.msg});
+                socket.emit("ChangePlayerNameError", {old_name: result.data.old_name, msg: result.msg});
         });
     
 
@@ -77,6 +77,22 @@ exports = module.exports = (io) => {
             }
             else
                 socket.emit("ErrorMessage", {msg: result.msg});
+        });
+
+
+        /**
+         * Player types a message in their chat box
+         *  note: attached to lobby, but should only emit during game 
+         *        since socket only recieves event during game
+         * @param {lobby_code: {string}}
+         */
+        socket.on("SendChat", param => {
+            const lobby_code = param.lobby_code;
+            const player_info = lobbies.getPlayerName(socket.id, lobby_code);
+            if (player_info.passed)
+                io.to(lobby_code).emit("ChatMessage", {name: player_info.data, msg: param.msg});
+            else
+                socket.emit("ErrorMessage", {msg: player_info.msg});
         });
 
 

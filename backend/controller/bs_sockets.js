@@ -88,13 +88,18 @@ exports = module.exports = (io) => {
                     return;
 
                 // Remove player and update turn info in case it was their turn
-                games.removePlayer(code, socket.id);
-                io.in(code).emit("UpdateTurnInfo", games.getCurrentTurn(code));
+                const result = games.removePlayer(code, socket.id);
+                if (result.passed) {
+                    io.in(code).emit("UpdateTurnInfo", games.getCurrentTurn(code));
+
+                    // Chat message to notify player left
+                    io.to(code).emit("ChatMessage", {name: "Admin", msg: `${result.data} has left the game`});
                 
-                // Stop game if conditions met
-                const stop_game = games.declareWinnerDC(code);
-                if(stop_game.passed)
-                io.in(code).emit("GameOver", stop_game.data);
+                    // Stop game if conditions met
+                    const stop_game = games.declareWinnerDC(code);
+                    if(stop_game.passed)
+                    io.in(code).emit("GameOver", stop_game.data);
+                }
             });
 
         });
