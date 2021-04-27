@@ -10,6 +10,8 @@
 class CPile {
     
     constructor() {
+
+        // An initial card group is set in case BS is called on turn 1
         this.card_stack = [{pos: -1, cards: [], exp_rank: -1}];
         this.count = 0;
     }
