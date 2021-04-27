@@ -38,6 +38,7 @@ function Game(props: RouterProps) {
   const [playedCards, setPlayedCards] = useState({ pos: 0, count: 0 });
   const [bsDest, setBsDest] = useState(-1);
   const [chatMsgs, setChatMsgs] = useState<{ name: string, msg: string }[]>([]);
+  const [opNum, setOpNum] = useState(0);
 
   const toggleCard = card => {
     if (selectedCards.includes(card)) {
@@ -50,6 +51,7 @@ function Game(props: RouterProps) {
   const playTurn = () => {
     if (selectedCards.length === 0) return;
     socket.emit('PlayCard', {
+      op_num: opNum,
       lobby_code: player.room,
       cards: selectedCards.map(getCardID)
     });
@@ -58,6 +60,7 @@ function Game(props: RouterProps) {
 
   const callBS = () => {
     socket.emit('CallBS', {
+      op_num: opNum,
       lobby_code: player.room
     });
     setSelectedCards([]);
@@ -95,6 +98,7 @@ function Game(props: RouterProps) {
       socket.emit('CloseBSSockets');
     });
     socket.on('PlayCardEvent', e => setPlayedCards(e));
+    socket.on('UpdateOpNum', n => setOpNum(n));
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 

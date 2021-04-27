@@ -15,13 +15,13 @@ exports = module.exports = (io) => {
             socket.on("PlayCard", info => {
                 const code = info.lobby_code;
                 const cards = info.cards;
-                const op_num = info.op_num ? info.op_num: -1;
+                const op_num = info.op_num;
 
                 const result = games.playCards(code, socket.id, cards, op_num);
                 if (result.passed) {
                     socket.emit("UpdatePlayerHand", games.getPlayerHand(code, socket.id));
                     io.in(code).emit("UpdateOtherHands", games.getAllHandSize(code));
-                    //io.in(code).emit("UpdateOpNum", games.getOpNum(code));
+                    io.in(code).emit("UpdateOpNum", games.getOpNum(code));
                     io.in(code).emit("PlayCardEvent", {count: cards.length, nickname: result.data.nickname, pos: result.data.pos});
                     io.in(code).emit("UpdateCenterPile", {change: games.cPileSize(code)});
                     io.in(code).emit("UpdateTurnInfo", games.getCurrentTurn(code));
@@ -55,7 +55,7 @@ exports = module.exports = (io) => {
              */
             socket.on("CallBS", info => {
                 const code = info.lobby_code;
-                const op_num = info.op_num ? info.op_num: -1;
+                const op_num = info.op_num;
 
                 const result = games.callBS(code, socket.id, op_num);
                 if (result.passed) {
@@ -70,7 +70,7 @@ exports = module.exports = (io) => {
                         io.to(sid).emit("UpdatePlayerHand", games.getPlayerHand(code, sid));
                     });
                     io.in(code).emit("UpdateOtherHands", games.getAllHandSize(code));
-                    //io.in(code).emit("UpdateOpNum", games.getOpNum(code));
+                    io.in(code).emit("UpdateOpNum", games.getOpNum(code));
                     io.in(code).emit("UpdateCenterPile", {change: games.cPileSize(code)});
                 }
             });
