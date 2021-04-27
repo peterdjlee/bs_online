@@ -177,20 +177,20 @@ class BS {
      *          data provides context of player and cards played
      */
     playCards(SID, cards, op_num) {
-        const pos = this.SID_to_position.get(SID);
 
         // Security Checks
+        if (op_num !== this.operation_num)
+            return this.retError("Local information is outdated and action cannot be processed (qefw)");
+        this.operation_num += 1;
+
+        const pos = this.SID_to_position.get(SID);
         if (this.cur_turn_pos !== pos)
             return this.retError("Cards played during another player's turn");
+        
         for (let i = 0; i < cards.length; i+=1) {
             if (!this.player_hands[pos].includes(cards[i]))
                 return this.retError("A card not owned by the player is played (1r2q)");
         }
-        if (op_num !== this.operation_num) {
-            if(op_num !== -1)
-                return this.retError("Local information is outdated and action cannot be processed (qefw)");
-        }
-        this.operation_num += 1;
 
         // Apply logic for when a player plays a card
         this.playerRemoveCards(pos, cards);
@@ -220,14 +220,14 @@ class BS {
     callBS(source_SID, op_num) {
 
         // Security checks
+        if (op_num !== this.operation_num)
+            return this.retError("Local information is outdated and action cannot be processed (qefw)");
+        this.operation_num += 1;
+
         if (this.cur_turn_bs_called)
             return this.retError("BS has already been called this turn");
         this.cur_turn_bs_called = true;
-        if (op_num !== this.operation_num) {
-            if(op_num !== -1)
-                return this.retError("Local information is outdated and action cannot be processed (qefw)");
-        }
-        this.operation_num += 1;
+
         const pos = this.player_SIDs.indexOf(source_SID);
         if (pos === -1)
             return this.retError("Permission error (S3R5)");
