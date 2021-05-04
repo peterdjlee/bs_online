@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, TextField, Typography } from "@material-ui/core";
 
+
 function Chat({ chatMsgs, sendChat }) {
   const [input, setInput] = useState('');
   const send = e => {
@@ -25,7 +26,7 @@ function Chat({ chatMsgs, sendChat }) {
         {chatMsgs.map((msg, i) => (
           <Box key={i} width={370} m={1}>
             <Typography>
-              {`${msg.name}: ${msg.msg}`}
+              <b>{`${msg.name}`}</b>{`: ${msg.msg}`}
             </Typography>
           </Box>
         ))}
