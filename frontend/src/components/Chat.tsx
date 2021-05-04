@@ -1,11 +1,25 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Box, Button, TextField, Typography } from "@material-ui/core";
+import { SocketContext } from "../util/socket";
+import { PlayerContext } from "../util/player";
 
-function Chat({ chatMsgs, sendChat }) {
+function Chat() {
+  const socket = useContext(SocketContext);
+  const player = useContext(PlayerContext);
+
   const [input, setInput] = useState('');
+  const [chatMsgs, setChatMsgs] = useState<{ name: string, msg: string }[]>([]);
+
+  useEffect(() => {
+    socket.on('ChatMessage', msg => setChatMsgs([...chatMsgs, msg]));
+  }, [chatMsgs]);
+
   const send = e => {
     e.preventDefault();
-    sendChat(input);
+    socket.emit('SendChat', {
+      lobby_code: player.room,
+      msg: input
+    })
     setInput('');
   }
 
