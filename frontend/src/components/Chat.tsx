@@ -1,9 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Box, Button, TextField, Typography } from "@material-ui/core";
+import { Box, Button, makeStyles, TextField, Typography } from "@material-ui/core";
 import { SocketContext } from "../util/socket";
 import { PlayerContext } from "../util/player";
 
+const useStyles = makeStyles({
+  emoji: {
+    fontSize: '2em'
+  }
+});
+
 function Chat() {
+  const classes = useStyles();
+
   const socket = useContext(SocketContext);
   const player = useContext(PlayerContext);
 
@@ -23,6 +31,9 @@ function Chat() {
     setInput('');
   }
 
+  const emojis = [ '😆', '😯', '😢', '😡', '🙈', '💯' ];
+  const sendEmoji = emoji => () => setInput(`${input}${emoji}`);
+
   return (
     <Box
       height="100vh"
@@ -33,7 +44,7 @@ function Chat() {
       <Box
         display="flex"
         width={1}
-        height="calc(100% - 56px)"
+        height="calc(100% - 56px - 61px)"
         flexDirection="column"
         style={{ overflowY: "scroll" }}>
         {chatMsgs.map((msg, i) => (
@@ -42,6 +53,16 @@ function Chat() {
               {`${msg.name}: ${msg.msg}`}
             </Typography>
           </Box>
+        ))}
+      </Box>
+      <Box
+        alignSelf="flex-end"
+        display="flex"
+        justifyContent="space-evenly">
+        {emojis.map(emoji => (
+          <Button className={classes.emoji} onClick={sendEmoji(emoji)}>
+            {emoji}
+          </Button>
         ))}
       </Box>
       <Box alignSelf="flex-end">
