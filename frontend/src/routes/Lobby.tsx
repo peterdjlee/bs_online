@@ -89,10 +89,13 @@ function Lobby(props: RouterProps) {
         setNotification(err.msg);
         player.nickname = err.old_name;
       });
-      socket.emit('AddPlayer', {
-        lobby_code: player.room,
-        nickname: player.nickname
-      });
+      const resetLobby = props.history.location.state;
+      if (!resetLobby) {
+        socket.emit('AddPlayer', {
+          lobby_code: player.room,
+          nickname: player.nickname
+        });
+      }
     }
   }, []);
 

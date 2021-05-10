@@ -91,6 +91,10 @@ function Game(props: RouterProps) {
     });
     socket.on('PlayCardEvent', e => setPlayedCards(e));
     socket.on('UpdateOpNum', n => setOpNum(n));
+    socket.on('StopGame', () => {
+      // pass true in the state meaning reset lobby
+      props.history.push('/lobby', true);
+    })
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
 
