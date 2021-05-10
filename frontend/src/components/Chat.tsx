@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Box, Button, makeStyles, TextField, Typography } from "@material-ui/core";
 import { SocketContext } from "../util/socket";
 import { PlayerContext } from "../util/player";
+import { ChatContext } from "../util/chat";
 
 const useStyles = makeStyles({
   emoji: {
@@ -17,12 +18,16 @@ function Chat() {
 
   const socket = useContext(SocketContext);
   const player = useContext(PlayerContext);
+  const chat = useContext(ChatContext);
 
   const [input, setInput] = useState('');
-  const [chatMsgs, setChatMsgs] = useState<{ name: string, msg: string }[]>([]);
+  const [chatMsgs, setChatMsgs] = useState(chat);
 
   useEffect(() => {
-    socket.on('ChatMessage', msg => setChatMsgs([...chatMsgs, msg]));
+    socket.on('ChatMessage', msg => {
+      setChatMsgs([...chatMsgs, msg]);
+      chat.push(msg);
+    });
   }, [chatMsgs]);
 
   const send = e => {

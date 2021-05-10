@@ -5,6 +5,7 @@ import { SocketContext } from '../util/socket';
 import { PlayerContext } from '../util/player';
 import { RouterProps, withRouter } from 'react-router-dom';
 import { NotificationContext } from '../util/notification';
+import Chat from '../components/Chat';
 
 const useStyles = makeStyles({
   subtitle: {
@@ -97,73 +98,79 @@ function Lobby(props: RouterProps) {
 
   return (
     <Box
-      height="100vh"
       display="flex"
-      flexDirection="column"
-      alignItems="center">
-      <Typography className={classes.subtitle}>Invite</Typography>
+      flexDirection="row"
+      justifyContent="space-evenly">
       <Box
-        border={1}
-        borderRadius="borderRadius"
-        borderColor="grey.400"
-        flexDirection="row"
-        display="flex"
-        width="300px">
-        <Box width="100vh"
-          display="flex"
-          alignItems="center">
-          <Typography className={classes.link}>{gameLink}</Typography>
-        </Box>
-        <Box
-          borderLeft={1}
-          borderColor="grey.400"
-          alignItems="center"
-          display="flex">
-          <Button
-            color="primary"
-            className={classes.copyButton}
-            onClick={() => navigator.clipboard.writeText(gameLink)}>
-            Copy
-          </Button>
-        </Box>
-      </Box>
-      <Box
-        height="450px"
+        height="100vh"
         display="flex"
         flexDirection="column"
         alignItems="center">
-        <Typography className={classes.title}>Players</Typography>
-        <Divider className={classes.divider} orientation="horizontal"></Divider>
-        {players.map((p, i) => (
-          <Typography
-            key={i}
-            className={player.nickname === p ? classes.activePlayer : classes.player}>
-            {p}
-          </Typography>
-        ))}
-        <form onSubmit={changeName}>
-          <Box display="flex">
-            <TextField
-              onChange={e => setNewName(e.target.value)}
-              label="Change nickname"
-              variant="outlined" />
+        <Typography className={classes.subtitle}>Invite</Typography>
+        <Box
+          border={1}
+          borderRadius="borderRadius"
+          borderColor="grey.400"
+          flexDirection="row"
+          display="flex"
+          width="300px">
+          <Box width="100vh"
+            display="flex"
+            alignItems="center">
+            <Typography className={classes.link}>{gameLink}</Typography>
+          </Box>
+          <Box
+            borderLeft={1}
+            borderColor="grey.400"
+            alignItems="center"
+            display="flex">
             <Button
-              type="submit"
-              className={classes.startButton}
-              variant="contained"
-              color="primary">
-              Save
+              color="primary"
+              className={classes.copyButton}
+              onClick={() => navigator.clipboard.writeText(gameLink)}>
+              Copy
             </Button>
           </Box>
-        </form>
+        </Box>
+        <Box
+          height="450px"
+          display="flex"
+          flexDirection="column"
+          alignItems="center">
+          <Typography className={classes.title}>Players</Typography>
+          <Divider className={classes.divider} orientation="horizontal"></Divider>
+          {players.map((p, i) => (
+            <Typography
+              key={i}
+              className={player.nickname === p ? classes.activePlayer : classes.player}>
+              {p}
+            </Typography>
+          ))}
+          <form onSubmit={changeName}>
+            <Box display="flex">
+              <TextField
+                onChange={e => setNewName(e.target.value)}
+                label="Change nickname"
+                variant="outlined" />
+              <Button
+                type="submit"
+                className={classes.startButton}
+                variant="contained"
+                color="primary">
+                Save
+              </Button>
+            </Box>
+          </form>
+        </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          className={classes.startButton}
+          onClick={handleStartGame}>
+          Start Game
+        </Button>
       </Box>
-      <Button
-        variant="contained"
-        color="primary"
-        className={classes.startButton}
-        onClick={handleStartGame}>
-        Start Game
-      </Button>
+      <Chat />
     </Box>
   )
 }
