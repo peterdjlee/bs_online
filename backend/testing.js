@@ -8,6 +8,8 @@ const BS = require("./models/BS")
 const WQueue = require("./utils/gameWQueue");
 
 
+var timeout_func;
+
 // --- Testing data ---
 const test_player_names = ["A", "B", "C", "D", "E", "F", "G"]
 const test_player_SIDs = [
@@ -56,7 +58,12 @@ for (let j = 0; j < 5; j += 1) {
 
 }
 
+timeout_func = setTimeout(function(){ console.log("3 Sec passed"); }, 3000);
+clearTimeout(timeout_func);
+timeout_func = setTimeout(function(){ console.log("3 Sec passed again"); }, 3000);
+
 // --------------------
+/*
 var start = window.performance.now();
 
 for (let i = 0; i < 100000; i += 1) {
@@ -66,3 +73,4 @@ for (let i = 0; i < 100000; i += 1) {
 
 var end = window.performance.now();
 console.log(end-start);
+*/
