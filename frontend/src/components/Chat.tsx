@@ -6,6 +6,9 @@ import { PlayerContext } from "../util/player";
 const useStyles = makeStyles({
   emoji: {
     fontSize: '2em'
+  },
+  chatMsg: {
+    fontSize: '1.5em'
   }
 });
 
@@ -49,7 +52,7 @@ function Chat() {
         style={{ overflowY: "scroll" }}>
         {chatMsgs.map((msg, i) => (
           <Box key={i} width={370} m={1}>
-            <Typography>
+            <Typography className={classes.chatMsg}>
               <b>{`${msg.name}`}</b>{`: ${msg.msg}`}
             </Typography>
           </Box>
