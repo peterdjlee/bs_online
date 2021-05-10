@@ -37,7 +37,6 @@ function Game(props: RouterProps) {
   const [winner, setWinner] = useState<string>();
   const [playedCards, setPlayedCards] = useState({ pos: 0, count: 0 });
   const [bsDest, setBsDest] = useState(-1);
-  const [chatMsgs, setChatMsgs] = useState<{ name: string, msg: string }[]>([]);
   const [opNum, setOpNum] = useState(0);
 
   const toggleCard = card => {
@@ -64,13 +63,6 @@ function Game(props: RouterProps) {
       lobby_code: player.room
     });
     setSelectedCards([]);
-  }
-
-  const sendChat = msg => {
-    socket.emit('SendChat', {
-      lobby_code: player.room,
-      msg: msg
-    })
   }
 
   useEffect(() => {
@@ -101,10 +93,6 @@ function Game(props: RouterProps) {
     socket.on('UpdateOpNum', n => setOpNum(n));
     socket.emit('RequestGameInfo', { lobby_code: player.room });
   }, []);
-
-  useEffect(() => {
-    socket.on('ChatMessage', msg => setChatMsgs([...chatMsgs, msg]));
-  }, [chatMsgs]);
 
   return (
     <Box
@@ -160,7 +148,7 @@ function Game(props: RouterProps) {
         </Button>
         <GameOver winner={winner} />
       </Box>
-      <Chat chatMsgs={chatMsgs} sendChat={sendChat} />
+      <Chat />
     </Box>
   )
 }
