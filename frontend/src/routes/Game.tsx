@@ -40,7 +40,7 @@ function Game(props: RouterProps) {
   const [playedCards, setPlayedCards] = useState({ pos: 0, count: 0 });
   const [bsDest, setBsDest] = useState(-1);
   const [opNum, setOpNum] = useState(0);
-  const [play] = useSound(bsSound);
+  const [play] = useSound(bsSound, { volume : 0.25});
 
   const toggleCard = card => {
     if (selectedCards.includes(card)) {
