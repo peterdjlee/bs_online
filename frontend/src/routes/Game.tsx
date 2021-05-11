@@ -11,6 +11,8 @@ import { compareCards, getCardID, getCardString, rankString } from '../util/card
 import { NotificationContext } from '../util/notification';
 import GameOver from '../components/GameOver';
 import Chat from '../components/Chat';
+import useSound from 'use-sound';
+import bsSound from '../assets/bs.mp3';
 
 const useStyles = makeStyles({
   title: {
@@ -38,6 +40,7 @@ function Game(props: RouterProps) {
   const [playedCards, setPlayedCards] = useState({ pos: 0, count: 0 });
   const [bsDest, setBsDest] = useState(-1);
   const [opNum, setOpNum] = useState(0);
+  const [play] = useSound(bsSound, { volume : 0.25});
 
   const toggleCard = card => {
     if (selectedCards.includes(card)) {
@@ -74,6 +77,7 @@ function Game(props: RouterProps) {
     socket.on('UpdateCenterPile', e => setPileCount(pileCount + e.change));
     socket.on('PlayCardsError', e => setNotification(e.msg));
     socket.on('BSResult', result => {
+      play();
       if (result.was_bs) {
         setBsDest(result.callee_pos);
       } else {
@@ -125,7 +129,7 @@ function Game(props: RouterProps) {
           top={0}>
           <Typography variant="h4">{rankString[turn.exp_rank]}</Typography>
           <Box textAlign="center" p={4}>
-            <Card height={100} back />
+            {pileCount != 0 ? <Card height={100} back /> : <Box></Box>}
             <Typography>{pileCount} cards</Typography>
           </Box>
           <Button
