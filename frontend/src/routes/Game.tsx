@@ -76,6 +76,20 @@ function Game(props: RouterProps) {
     socket.on('UpdateTurnInfo', turn => setTurn(turn));
     socket.on('UpdateCenterPile', e => setPileCount(pileCount + e.change));
     socket.on('PlayCardsError', e => setNotification(e.msg));
+    socket.on('GameOver', result => {
+      setWinner(result[0].nickname);
+      socket.emit('CloseBSSockets');
+    });
+    socket.on('PlayCardEvent', e => setPlayedCards(e));
+    socket.on('UpdateOpNum', n => setOpNum(n));
+    socket.on('StopGame', () => {
+      // pass true in the state meaning reset lobby
+      props.history.push('/lobby', true);
+    })
+    socket.emit('RequestGameInfo', { lobby_code: player.room });
+  }, []);
+
+  useEffect(() => {
     socket.on('BSResult', result => {
       play();
       if (result.was_bs) {
@@ -89,18 +103,7 @@ function Game(props: RouterProps) {
         ${result.was_bs ? 'correctly' : 'incorrectly'}
         called BS on ${result.callee_name}`);
     });
-    socket.on('GameOver', result => {
-      setWinner(result[0].nickname);
-      socket.emit('CloseBSSockets');
-    });
-    socket.on('PlayCardEvent', e => setPlayedCards(e));
-    socket.on('UpdateOpNum', n => setOpNum(n));
-    socket.on('StopGame', () => {
-      // pass true in the state meaning reset lobby
-      props.history.push('/lobby', true);
-    })
-    socket.emit('RequestGameInfo', { lobby_code: player.room });
-  }, []);
+  }, [play]);
 
   return (
     <Box
