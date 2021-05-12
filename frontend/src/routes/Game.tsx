@@ -69,6 +69,10 @@ function Game(props: RouterProps) {
   }
 
   useEffect(() => {
+    if (player.nickname === '' || player.room === '') {
+      props.history.push('/');
+      return;
+    }
     socket.on('UpdatePlayerHand', cards => {
       setHand(cards.map(getCardString).sort(compareCards));
     });
