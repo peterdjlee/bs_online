@@ -61,6 +61,7 @@ function Game(props: RouterProps) {
   }
 
   const callBS = () => {
+    if (opNum === 0) return;
     socket.emit('CallBS', {
       op_num: opNum,
       lobby_code: player.room
