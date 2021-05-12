@@ -57,6 +57,10 @@ function Lobby(props: RouterProps) {
 
   const gameLink = window.location.host + "/join/" + player.room;
   const handleStartGame = () => {
+    if (players.length < 2) {
+      setNotification('Cannot start a game without more players');
+      return;
+    }
     socket.emit('CreateGame', {
       lobby_code: player.room
     });
