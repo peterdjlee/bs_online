@@ -61,6 +61,7 @@ function Game(props: RouterProps) {
   }
 
   const callBS = () => {
+    if (opNum === 0) return;
     socket.emit('CallBS', {
       op_num: opNum,
       lobby_code: player.room
@@ -69,6 +70,10 @@ function Game(props: RouterProps) {
   }
 
   useEffect(() => {
+    if (player.nickname === '' || player.room === '') {
+      props.history.push('/');
+      return;
+    }
     socket.on('UpdatePlayerHand', cards => {
       setHand(cards.map(getCardString).sort(compareCards));
     });

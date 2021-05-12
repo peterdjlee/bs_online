@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core';
 import { Box, Button, Typography, TextField } from '@material-ui/core';
 import { RouterProps, useParams, withRouter } from 'react-router-dom';
 import { PlayerContext } from '../util/player';
+import { NotificationContext } from '../util/notification';
 
 const useStyles = makeStyles({
   title: {
@@ -20,13 +21,27 @@ function Join(props: RouterProps) {
   const [nickname, setNickname] = useState('');
   const { room } = useParams<{ room: string }>();
   const player = useContext(PlayerContext);
+  const setNotification = useContext(NotificationContext);
+
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (nickname === '') return;
-    player.nickname = nickname;
+    const nick = nickname.trim();
+    const excluded = ['you', 'Admin'];
+
+    if (nick === '') return;
+    else if (nick.length > 10) {
+      setNotification(`Nickname of length ${nick.length} too long (max 10)`);
+      return;
+    } else if (excluded.includes(nick)) {
+      setNotification(`${nick} is not an allowed nickname`);
+      return;
+    }
+    
+    player.nickname = nick;
     player.room = room;
     props.history.push(`/lobby`);
   }
+
   return (
     <form onSubmit={onSubmit}>
       <Box

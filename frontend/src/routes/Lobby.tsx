@@ -57,6 +57,10 @@ function Lobby(props: RouterProps) {
 
   const gameLink = window.location.host + "/join/" + player.room;
   const handleStartGame = () => {
+    if (players.length < 2) {
+      setNotification('Cannot start a game without more players');
+      return;
+    }
     socket.emit('CreateGame', {
       lobby_code: player.room
     });
@@ -64,6 +68,19 @@ function Lobby(props: RouterProps) {
 
   const changeName = e => {
     e.preventDefault();
+
+    const nick = newName.trim();
+    const excluded = ['you', 'Admin'];
+
+    if (nick === '') return;
+    else if (nick.length > 10) {
+      setNotification(`Nickname of length ${nick.length} too long (max 10)`);
+      return;
+    } else if (excluded.includes(nick)) {
+      setNotification(`${nick} is not an allowed nickname`);
+      return;
+    }
+
     socket.emit('ChangePlayerName', {
       nickname: newName,
       lobby_code: player.room
