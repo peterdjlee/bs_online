@@ -72,8 +72,9 @@ exports = module.exports = (io) => {
             const lobby_code = param.lobby_code;
             const result = lobbies.stop(socket.id, lobby_code);
             if (result.passed) {
-                io.in(lobby_code).emit("StopGame", {});
-                io.in(lobby_code).emit("UpdatePlayerList", lobbies.getPlayersDisplay(lobby_code));
+                const lobby_data = lobbies.getPlayersDisplay(lobby_code);
+                io.in(lobby_code).emit("StopGame", lobby_data);
+                io.in(lobby_code).emit("UpdatePlayerList", lobby_data);
             }
             else
                 socket.emit("ErrorMessage", {msg: result.msg});
