@@ -170,6 +170,7 @@ function Lobby(props: RouterProps) {
             <Box display="flex">
               <TextField
                 onChange={e => setNewName(e.target.value)}
+                value={newName}
                 label="Change nickname"
                 variant="outlined" />
               <Button
