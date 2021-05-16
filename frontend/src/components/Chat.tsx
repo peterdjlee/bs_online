@@ -32,10 +32,12 @@ function Chat() {
 
   const send = e => {
     e.preventDefault();
-    socket.emit('SendChat', {
-      lobby_code: player.room,
-      msg: input
-    })
+    if (input) {
+      socket.emit('SendChat', {
+        lobby_code: player.room,
+        msg: input
+      })
+    }
     setInput('');
   }
 
